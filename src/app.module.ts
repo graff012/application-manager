@@ -9,6 +9,7 @@ import { DepartmentsModule } from './departments/departments.module';
 import { ApplicationsModule } from './applications/applications.module';
 import { TelegramModule } from './telegram/telegram.module';
 import { AuthModule } from './auth/auth.module';
+import { InventoryModule } from './inventory/inventory.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { AuthModule } from './auth/auth.module';
     BranchesModule,
     DepartmentsModule,
     ApplicationsModule,
+    InventoryModule,
     TelegramModule,
     AuthModule,
   ],
