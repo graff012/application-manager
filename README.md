@@ -30,12 +30,14 @@ Ariza Manager is a NestJS + MongoDB + AWS S3 backend MVP to manage user-submitte
 ## Quick Start
 
 - **Install dependencies**
+
   ```bash
   npm install
   ```
 
 - **Environment variables**
   Create `.env` from `.env.example` and fill values:
+
   ```ini
   MONGO_URI=mongodb://localhost:27017/ariza-db   # or Atlas URI
   PORT=3000
@@ -44,15 +46,16 @@ Ariza Manager is a NestJS + MongoDB + AWS S3 backend MVP to manage user-submitte
 
   AWS_S3_ACCESS_KEY_ID=...
   AWS_S3_SECRET_ACCESS_KEY=...
-  AWS_S3_REGION=us-east-1
-  AWS_S3_BUCKET_NAME=application-bucketjon
+  AWS_S3_REGION=...
+  AWS_S3_BUCKET_NAME=...
 
   # Telegram is optional; leave TELEGRAM_CHAT_ID empty to disable notifications
   TELEGRAM_BOT_TOKEN=...
-  TELEGRAM_CHAT_ID=            
+  TELEGRAM_CHAT_ID=
   ```
 
 - **Run the app**
+
   ```bash
   npm run start:dev
   ```
@@ -107,6 +110,7 @@ All API routes are available under the global prefix `/api`.
 All endpoints below assume the prefix `/api`.
 
 ### Branches
+
 - **POST** `/branches`
   ```json
   { "name": "HQ" }
@@ -114,6 +118,7 @@ All endpoints below assume the prefix `/api`.
 - **GET** `/branches`
 
 ### Departments
+
 - **POST** `/departments`
   ```json
   { "name": "IT", "branch": "<branchId>" }
@@ -121,6 +126,7 @@ All endpoints below assume the prefix `/api`.
 - **GET** `/departments`
 
 ### Users
+
 - **POST** `/users` (no auth for MVP)
   ```json
   {
@@ -133,6 +139,7 @@ All endpoints below assume the prefix `/api`.
 - **GET** `/users` (JWT)
 
 ### Applications (JWT)
+
 - **POST** `/applications` (multipart)
   - Fields (text): `user`, `branch`, `department`, `room`, `issue`, `issueComment?`, `additionalComment?`
   - Files: `images` (repeatable file key)
@@ -145,6 +152,7 @@ All endpoints below assume the prefix `/api`.
   Allowed: `new|accepted|processed|rejected|completed`
 
 ### Inventory (JWT)
+
 - **POST** `/inventory` (multipart)
   - Fields (text): `serial` (number), `inventoryNumber` (string), `user`, `branch`, `department`
   - Files: `images` (repeatable file key)
@@ -168,6 +176,7 @@ All endpoints below assume the prefix `/api`.
 8. List Inventory → `GET /api/inventory`
 
 Tips for multipart:
+
 - Use key `images` for each file row.
 - Text numeric fields (e.g., `serial`) are strings in multipart; the app converts them to numbers.
 
