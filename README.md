@@ -23,7 +23,171 @@
 
 ## Description
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+# Ariza Manager – Backend API (NestJS)
+
+Ariza Manager is a NestJS + MongoDB + AWS S3 backend MVP to manage user-submitted Applications and organizational Inventory. It includes JWT-based authentication and optional Telegram notifications for Application events.
+
+## Quick Start
+
+- **Install dependencies**
+  ```bash
+  npm install
+  ```
+
+- **Environment variables**
+  Create `.env` from `.env.example` and fill values:
+  ```ini
+  MONGO_URI=mongodb://localhost:27017/ariza-db   # or Atlas URI
+  PORT=3000
+
+  JWT_SECRET=your_jwt_secret
+
+  AWS_S3_ACCESS_KEY_ID=...
+  AWS_S3_SECRET_ACCESS_KEY=...
+  AWS_S3_REGION=us-east-1
+  AWS_S3_BUCKET_NAME=application-bucketjon
+
+  # Telegram is optional; leave TELEGRAM_CHAT_ID empty to disable notifications
+  TELEGRAM_BOT_TOKEN=...
+  TELEGRAM_CHAT_ID=            
+  ```
+
+- **Run the app**
+  ```bash
+  npm run start:dev
+  ```
+
+- **Swagger**: http://localhost:3000/api/docs
+
+All API routes are available under the global prefix `/api`.
+
+## Tech Overview
+
+- NestJS (TypeScript), Mongoose (MongoDB)
+- Auth: JWT (`@nestjs/jwt`, `passport-jwt`)
+- Uploads: AWS S3 (`@aws-sdk/client-s3`, `multer-s3`)
+- Validation: `class-validator`, `class-transformer` with global implicit conversion
+- Swagger: `@nestjs/swagger`
+- Telegram: `telegraf` (only for Application notifications; optional)
+
+## Data Model
+
+- `User` (`src/users/schemas/user.schema.ts`)
+  - `id` (UUID), `tableNumber` (unique), `fullName`, `branch` (ref), `department` (ref)
+  - `inventoryHistory`: array of `{ inventory: ref Inventory, action: "assigned"|"updated", timestamp }`
+- `Branch` (`src/branches/schemas/branch.schema.ts`)
+  - `id`, `name`
+- `Department` (`src/departments/schemas/department.schema.ts`)
+  - `id`, `name`, `branch` (ref)
+- `Application` (`src/applications/schemas/application.schema.ts`)
+  - `id`, `index` ("00001-YYYY"), `status`, `user` (ref), `branch` (ref), `department` (ref),
+    `room`, `issue`, `issueComment?`, `images: string[]` (S3 URLs), `additionalComment?`, timestamps
+  - Telegram message on create/status change if `TELEGRAM_CHAT_ID` is set
+- `Inventory` (`src/inventory/schemas/inventory.schema.ts`)
+  - `id`, `serial` (number), `inventoryNumber` (unique), `images: string[]` (S3 URLs),
+    `user` (ref), `branch` (ref), `department` (ref), timestamps
+  - On create: log `assigned` in user history; on update (user change): log `updated`
+
+## Authentication
+
+- Login by tableNumber
+  - `POST /api/auth/login`
+  - Body:
+    ```json
+    { "tableNumber": 123 }
+    ```
+  - Response:
+    ```json
+    { "access_token": "<JWT>" }
+    ```
+  - Use `Authorization: Bearer <JWT>` for protected endpoints.
+
+## Endpoints
+
+All endpoints below assume the prefix `/api`.
+
+### Branches
+- **POST** `/branches`
+  ```json
+  { "name": "HQ" }
+  ```
+- **GET** `/branches`
+
+### Departments
+- **POST** `/departments`
+  ```json
+  { "name": "IT", "branch": "<branchId>" }
+  ```
+- **GET** `/departments`
+
+### Users
+- **POST** `/users` (no auth for MVP)
+  ```json
+  {
+    "tableNumber": 123,
+    "fullName": "John Doe",
+    "branch": "<branchId>",
+    "department": "<departmentId>"
+  }
+  ```
+- **GET** `/users` (JWT)
+
+### Applications (JWT)
+- **POST** `/applications` (multipart)
+  - Fields (text): `user`, `branch`, `department`, `room`, `issue`, `issueComment?`, `additionalComment?`
+  - Files: `images` (repeatable file key)
+  - Behavior: uploads to S3, generates `index`, saves; sends Telegram if `TELEGRAM_CHAT_ID` set
+- **GET** `/applications` (optional `?user=<userId>`)
+- **PATCH** `/applications/:id/status`
+  ```json
+  { "status": "accepted" }
+  ```
+  Allowed: `new|accepted|processed|rejected|completed`
+
+### Inventory (JWT)
+- **POST** `/inventory` (multipart)
+  - Fields (text): `serial` (number), `inventoryNumber` (string), `user`, `branch`, `department`
+  - Files: `images` (repeatable file key)
+  - Behavior: uploads to S3, saves; logs `assigned` in `User.inventoryHistory`
+- **GET** `/inventory` – list all (populated)
+- **GET** `/inventory/:id` – get one (populated)
+- **PATCH** `/inventory/:id` (multipart)
+  - Optional fields: `serial`, `inventoryNumber`, `user`, `branch`, `department`
+  - Optional files: `images` (replaces if provided)
+  - Logs `updated` in user history if `user` changes
+
+## Using Postman
+
+1. Create Branch → `POST /api/branches` → get `branchId`
+2. Create Department → `POST /api/departments` with `branchId` → get `departmentId`
+3. Create User → `POST /api/users` → get `userId`
+4. Login → `POST /api/auth/login` with `{ tableNumber }` → get JWT
+5. Create Application → `POST /api/applications` (multipart with `images`)
+6. Update Application Status → `PATCH /api/applications/:id/status`
+7. Create Inventory → `POST /api/inventory` (multipart)
+8. List Inventory → `GET /api/inventory`
+
+Tips for multipart:
+- Use key `images` for each file row.
+- Text numeric fields (e.g., `serial`) are strings in multipart; the app converts them to numbers.
+
+## S3 Public Access
+
+- Code does not send object ACLs. To make images public:
+  - Disable "Block all public access" on the bucket (if desired)
+  - Add a bucket policy allowing `s3:GetObject` on `arn:aws:s3:::<bucket>/*`
+- Otherwise, keep private and use presigned URLs (not implemented by default).
+
+## Files to Know
+
+- App bootstrap/Swagger: `src/main.ts`
+- Mongo config: `src/app.module.ts`
+- Telegram (Applications only): `src/telegram/telegram.service.ts`
+- Applications: `src/applications/*`
+- Inventory: `src/inventory/*`
+- Users (history): `src/users/schemas/user.schema.ts`
+
+---
 
 ## Project setup
 
