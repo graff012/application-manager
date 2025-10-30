@@ -1,8 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsIn } from 'class-validator';
+import { IsEnum, IsNotEmpty } from 'class-validator';
 
 export class UpdateStatusDto {
-  @ApiProperty({ enum: ['new', 'accepted', 'processed', 'rejected', 'completed'] })
-  @IsIn(['new', 'accepted', 'processed', 'rejected', 'completed'])
-  status: 'new' | 'accepted' | 'processed' | 'rejected' | 'completed';
+  @ApiProperty({ enum: ['new', 'assigned', 'progressing', 'testing', 'completed', 'rejected'] })
+  @IsEnum(['new', 'assigned', 'progressing', 'testing', 'completed', 'rejected'])
+  @IsNotEmpty()
+  status: 'new' | 'assigned' | 'progressing' | 'testing' | 'completed' | 'rejected';
 }

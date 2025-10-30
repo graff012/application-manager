@@ -4,8 +4,13 @@ import { MulterModule } from '@nestjs/platform-express';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ApplicationsService } from './applications.service';
 import { ApplicationsController } from './applications.controller';
+import { ApplicationsEmployeeController } from './applications-employee.controller';
+import { ApplicationsUserController } from './applications-user.controller';
 import { Application, ApplicationSchema } from './schemas/application.schema';
 import { TelegramModule } from '../telegram/telegram.module';
+import { EmployeesModule } from '../employees/employees.module';
+import { PositionsModule } from '../positions/positions.module';
+import { EmployeeGateway } from '../employees/employee.gateway';
 import { S3Client } from '@aws-sdk/client-s3';
 import multerS3 from 'multer-s3';
 
@@ -13,6 +18,8 @@ import multerS3 from 'multer-s3';
   imports: [
     MongooseModule.forFeature([{ name: Application.name, schema: ApplicationSchema }]),
     TelegramModule,
+    EmployeesModule,
+    PositionsModule,
     ConfigModule,
     MulterModule.registerAsync({
       imports: [ConfigModule],
@@ -42,7 +49,8 @@ import multerS3 from 'multer-s3';
       },
     }),
   ],
-  controllers: [ApplicationsController],
+  controllers: [ApplicationsController, ApplicationsEmployeeController, ApplicationsUserController],
   providers: [ApplicationsService],
+  exports: [ApplicationsService],
 })
 export class ApplicationsModule {}

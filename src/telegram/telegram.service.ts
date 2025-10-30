@@ -17,4 +17,10 @@ export class TelegramService {
   async sendMessage(chatId: string | number, text: string) {
     return this.bot.telegram.sendMessage(chatId, text);
   }
+
+  async sendTestNotification(message: string) {
+    // For testing: All notifications go to chat ID 1391380244
+    const testChatId = this.config.get<string>('TELEGRAM_CHAT_ID') || '1391380244';
+    return this.bot.telegram.sendMessage(testChatId, message);
+  }
 }

@@ -1,10 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { Application, ApplicationDocument } from './schemas/application.schema';
 import { CreateApplicationDto } from './dto/create-application.dto';
 import { TelegramService } from '../telegram/telegram.service';
 import { ConfigService } from '@nestjs/config';
+import { EmployeeGateway } from '../employees/employee.gateway';
 
 @Injectable()
 export class ApplicationsService {
@@ -12,6 +13,7 @@ export class ApplicationsService {
     @InjectModel(Application.name) private appModel: Model<ApplicationDocument>,
     private readonly telegram: TelegramService,
     private readonly config: ConfigService,
+    private readonly employeeGateway: EmployeeGateway
   ) {}
 
   private async generateIndex(): Promise<string> {
@@ -31,12 +33,16 @@ export class ApplicationsService {
 
   async create(dto: CreateApplicationDto, imageUrls: string[]) {
     const index = await this.generateIndex();
-    const created = await this.appModel.create({ ...dto, index, images: imageUrls });
+    const created = await this.appModel.create({
+      ...dto,
+      index,
+      images: imageUrls,
+    });
     const chatId = this.config.get<string>('TELEGRAM_CHAT_ID');
     if (chatId && /^-?\d+$/.test(chatId)) {
       await this.telegram.sendMessage(
         chatId,
-        `Application ${index} created with issue: ${created.issue}.`,
+        `Application ${index} created with issue: ${created.issue}.`
       );
     }
     return created;
@@ -48,20 +54,126 @@ export class ApplicationsService {
       .populate('user')
       .populate('branch')
       .populate('department')
+      .populate('assignedTo')
+      .exec();
+  }
+
+  async findOne(id: string) {
+    const app = await this.appModel
+      .findOne({ id })
+      .populate('user')
+      .populate('branch')
+      .populate('department')
+      .populate('assignedTo')
+      .populate('history.assignedTo')
+      .populate('history.changedBy')
+      .exec();
+    if (!app) throw new NotFoundException('Application not found');
+    return app;
+  }
+
+  async findByUser(userId: string) {
+    return this.appModel
+      .find({ user: userId })
+      .populate('assignedTo')
+      .populate('history.assignedTo')
+      .populate('history.changedBy')
+      .exec();
+  }
+
+  async findByEmployee(employeeId: any) {
+    return this.appModel
+      .find({ assignedTo: employeeId })
+      .populate('user')
+      .populate('branch')
+      .populate('department')
       .exec();
   }
 
   async updateStatus(id: string, status: string) {
-    const updated = await this.appModel.findByIdAndUpdate(id, { status }, { new: true }).exec();
+    const updated = await this.appModel
+      .findByIdAndUpdate(id, { status }, { new: true })
+      .exec();
     if (updated) {
       const chatId = this.config.get<string>('TELEGRAM_CHAT_ID');
       if (chatId && /^-?\d+$/.test(chatId)) {
         await this.telegram.sendMessage(
           chatId,
-          `Application ${updated.index} status updated to ${status}.`,
+          `Application ${updated.index} status updated to ${status}.`
         );
       }
     }
     return updated;
+  }
+
+  async assignToEmployee(
+    applicationId: string,
+    employeeId: string,
+    employeeName: string
+  ) {
+    const app = await this.appModel.findOne({ id: applicationId }).exec();
+    if (!app) throw new NotFoundException('Application not found');
+
+    const employeeObjectId = new Types.ObjectId(employeeId);
+    app.assignedTo = employeeObjectId;
+    app.status = 'assigned';
+    app.history.push({
+      status: 'assigned',
+      assignedTo: employeeObjectId,
+      changedBy: employeeObjectId,
+      timestamp: new Date(),
+    });
+
+    await app.save();
+
+    // WebSocket notification
+    this.employeeGateway.broadcastAppAssigned({
+      applicationId: app.id,
+      employeeId,
+      employeeName,
+    });
+
+    // Telegram notification
+    await this.telegram.sendTestNotification(
+      `Application ${app.index} assigned to ${employeeName}`
+    );
+
+    return app;
+  }
+
+  async updateApplicationStatus(
+    applicationId: string,
+    newStatus: string,
+    employeeId: string,
+    employeeName: string
+  ) {
+    const app = await this.appModel.findOne({ id: applicationId }).exec();
+    if (!app) throw new NotFoundException('Application not found');
+
+    const employeeObjectId = new Types.ObjectId(employeeId);
+    app.status = newStatus as any;
+    app.history.push({
+      status: newStatus,
+      assignedTo: app.assignedTo,
+      changedBy: employeeObjectId,
+      timestamp: new Date(),
+    });
+
+    await app.save();
+
+    // WebSocket notification
+    this.employeeGateway.broadcastStatusChanged({
+      applicationId: app.id,
+      newStatus,
+      changedBy: employeeName,
+      timestamp: new Date(),
+    });
+
+    // Telegram notification
+    await this.telegram.sendTestNotification(
+      `Application ${app.index} status changed to ${newStatus} by ${employeeName}`
+    );
+
+    return app;
   }
 }
