@@ -10,22 +10,48 @@ export class Inventory {
   id: string;
 
   @Prop({ required: true })
-  serial: number;
+  name: string;
 
   @Prop({ required: true, unique: true })
   inventoryNumber: string;
 
+  @Prop()
+  serial?: string;
+
   @Prop({ type: [String], default: [] })
   images: string[];
 
-  @Prop({ type: Types.ObjectId, ref: 'User', required: true })
-  user: Types.ObjectId;
+  @Prop({ type: Types.ObjectId, ref: 'User' })
+  assignedTo?: Types.ObjectId;
 
-  @Prop({ type: Types.ObjectId, ref: 'Branch', required: true })
-  branch: Types.ObjectId;
+  @Prop({ type: Types.ObjectId, ref: 'Branch' })
+  branch?: Types.ObjectId;
 
-  @Prop({ type: Types.ObjectId, ref: 'Department', required: true })
-  department: Types.ObjectId;
+  @Prop({ type: Types.ObjectId, ref: 'Department' })
+  department?: Types.ObjectId;
+
+  @Prop({ enum: ['active', 'repair', 'broken'], default: 'active' })
+  status: string;
+
+  @Prop({
+    type: [
+      {
+        action: { type: String, enum: ['assigned', 'repair', 'returned', 'broken'], required: true },
+        by: { type: Types.ObjectId, refPath: 'history.byModel' },
+        byModel: { type: String, enum: ['User', 'Employee'], required: true },
+        at: { type: Date, default: () => new Date() },
+        comment: { type: String },
+      },
+    ],
+    default: [],
+  })
+  history: Array<{
+    action: string;
+    by: Types.ObjectId;
+    byModel: string;
+    at: Date;
+    comment?: string;
+  }>;
 }
 
 export const InventorySchema = SchemaFactory.createForClass(Inventory);

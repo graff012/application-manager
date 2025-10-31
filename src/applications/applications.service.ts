@@ -37,6 +37,15 @@ export class ApplicationsService {
       ...dto,
       index,
       images: imageUrls,
+      history: [
+        {
+          status: 'new',
+          changedBy: dto.user,
+          changedByModel: 'User',
+          changedAt: new Date(),
+          comment: 'Ariza yaratildi',
+        },
+      ],
     });
     const chatId = this.config.get<string>('TELEGRAM_CHAT_ID');
     if (chatId && /^-?\d+$/.test(chatId)) {
@@ -55,6 +64,11 @@ export class ApplicationsService {
       .populate('branch')
       .populate('department')
       .populate('assignedTo')
+      .populate('inventory')
+      .populate({
+        path: 'history.changedBy',
+        select: 'fullName',
+      })
       .exec();
   }
 
@@ -65,8 +79,11 @@ export class ApplicationsService {
       .populate('branch')
       .populate('department')
       .populate('assignedTo')
-      .populate('history.assignedTo')
-      .populate('history.changedBy')
+      .populate('inventory')
+      .populate({
+        path: 'history.changedBy',
+        select: 'fullName',
+      })
       .exec();
     if (!app) throw new NotFoundException('Application not found');
     return app;
@@ -76,8 +93,11 @@ export class ApplicationsService {
     return this.appModel
       .find({ user: userId })
       .populate('assignedTo')
-      .populate('history.assignedTo')
-      .populate('history.changedBy')
+      .populate('inventory')
+      .populate({
+        path: 'history.changedBy',
+        select: 'fullName',
+      })
       .exec();
   }
 
@@ -119,9 +139,10 @@ export class ApplicationsService {
     app.status = 'assigned';
     app.history.push({
       status: 'assigned',
-      assignedTo: employeeObjectId,
       changedBy: employeeObjectId,
-      timestamp: new Date(),
+      changedByModel: 'Employee',
+      changedAt: new Date(),
+      comment: `Assigned to ${employeeName}`,
     });
 
     await app.save();
@@ -154,9 +175,10 @@ export class ApplicationsService {
     app.status = newStatus as any;
     app.history.push({
       status: newStatus,
-      assignedTo: app.assignedTo,
       changedBy: employeeObjectId,
-      timestamp: new Date(),
+      changedByModel: 'Employee',
+      changedAt: new Date(),
+      comment: `Status changed by ${employeeName}`,
     });
 
     await app.save();

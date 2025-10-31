@@ -21,6 +21,15 @@ export class User {
   @Prop({ type: Types.ObjectId, ref: 'Department' })
   department: Types.ObjectId;
 
+  @Prop({ required: false })
+  phone?: string;
+
+  @Prop({ required: false, enum: ['male', 'female', 'other'] })
+  gender?: string;
+
+  @Prop({ default: false })
+  profileComplete: boolean;
+
   @Prop({
     type: [
       {

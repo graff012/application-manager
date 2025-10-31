@@ -9,25 +9,32 @@ import {
 import { Type } from 'class-transformer';
 
 export class CreateInventoryDto {
-  @ApiProperty()
-  @IsInt()
-  @Type(() => Number)
-  serial: number;
+  @ApiProperty({ example: 'Canon mf3010' })
+  @IsString()
+  @IsNotEmpty()
+  name: string;
 
-  @ApiProperty()
+  @ApiProperty({ example: '2000102' })
   @IsString()
   @IsNotEmpty()
   inventoryNumber: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  serial?: string;
 
   @ApiProperty()
   @IsMongoId()
   user: string;
 
-  @ApiProperty()
+  @ApiProperty({ required: false })
+  @IsOptional()
   @IsMongoId()
-  branch: string;
+  branch?: string;
 
-  @ApiProperty()
+  @ApiProperty({ required: false })
+  @IsOptional()
   @IsMongoId()
-  department: string;
+  department?: string;
 }

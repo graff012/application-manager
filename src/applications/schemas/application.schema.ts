@@ -4,7 +4,12 @@ import { v4 as uuid } from 'uuid';
 
 export type ApplicationDocument = HydratedDocument<Application>;
 
-export type ApplicationStatus = 'new' | 'assigned' | 'progressing' | 'testing' | 'completed' | 'rejected';
+export type ApplicationStatus =
+  | 'new'
+  | 'assigned'
+  | 'progressing'
+  | 'completed'
+  | 'rejected';
 
 @Schema({ timestamps: true })
 export class Application {
@@ -14,7 +19,11 @@ export class Application {
   @Prop({ required: true })
   index: string;
 
-  @Prop({ required: true, enum: ['new', 'assigned', 'progressing', 'testing', 'completed', 'rejected'], default: 'new' })
+  @Prop({
+    required: true,
+    enum: ['new', 'assigned', 'progressing', 'completed', 'rejected'],
+    default: 'new',
+  })
   status: ApplicationStatus;
 
   @Prop({ type: Types.ObjectId, ref: 'User', required: true })
@@ -41,6 +50,9 @@ export class Application {
   @Prop()
   additionalComment: string;
 
+  @Prop({ type: Types.ObjectId, ref: 'Inventory' })
+  inventory?: Types.ObjectId;
+
   @Prop({ type: Types.ObjectId, ref: 'Employee' })
   assignedTo: Types.ObjectId;
 
@@ -48,18 +60,20 @@ export class Application {
     type: [
       {
         status: { type: String, required: true },
-        assignedTo: { type: Types.ObjectId, ref: 'Employee' },
-        changedBy: { type: Types.ObjectId, ref: 'Employee' },
-        timestamp: { type: Date, default: () => new Date() },
+        changedBy: { type: Types.ObjectId, refPath: 'history.changedByModel' },
+        changedByModel: { type: String, enum: ['User', 'Employee'], required: true },
+        changedAt: { type: Date, default: () => new Date() },
+        comment: { type: String },
       },
     ],
     default: [],
   })
   history: Array<{
     status: string;
-    assignedTo: Types.ObjectId;
     changedBy: Types.ObjectId;
-    timestamp: Date;
+    changedByModel: string;
+    changedAt: Date;
+    comment?: string;
   }>;
 }
 

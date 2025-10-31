@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Patch, Post, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Request, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
 import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { InventoryService } from './inventory.service';
@@ -16,9 +16,10 @@ export class InventoryController {
   @Post()
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FilesInterceptor('images', 10))
-  async create(@Body() dto: CreateInventoryDto, @UploadedFiles() files: any[]) {
+  async create(@Body() dto: CreateInventoryDto, @UploadedFiles() files: any[], @Request() req) {
     const urls = (files || []).map((f: any) => f.location).filter(Boolean);
-    return this.inventoryService.create(dto, urls);
+    const employeeId = req.user?.role === 'employee' || req.user?.role === 'admin' ? req.user.userId : undefined;
+    return this.inventoryService.create(dto, urls, employeeId);
   }
 
   @Get()
@@ -38,8 +39,10 @@ export class InventoryController {
     @Param('id') id: string,
     @Body() dto: UpdateInventoryDto,
     @UploadedFiles() files: any[],
+    @Request() req,
   ) {
     const urls = (files || []).map((f: any) => f.location).filter(Boolean);
-    return this.inventoryService.update(id, dto, urls.length ? urls : undefined);
+    const employeeId = req.user?.role === 'employee' || req.user?.role === 'admin' ? req.user.userId : undefined;
+    return this.inventoryService.update(id, dto, urls.length ? urls : undefined, employeeId);
   }
 }

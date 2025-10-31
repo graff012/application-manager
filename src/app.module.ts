@@ -10,6 +10,7 @@ import { ApplicationsModule } from './applications/applications.module';
 import { TelegramModule } from './telegram/telegram.module';
 import { AuthModule } from './auth/auth.module';
 import { InventoryModule } from './inventory/inventory.module';
+import { DatabaseModule } from './database/database.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { InventoryModule } from './inventory/inventory.module';
         uri: config.get<string>('MONGO_URI'),
       }),
     }),
+    DatabaseModule,
     UsersModule,
     BranchesModule,
     DepartmentsModule,
