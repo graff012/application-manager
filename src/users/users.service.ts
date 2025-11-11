@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User, UserDocument } from './schemas/user.schema';
@@ -9,15 +9,25 @@ import { UpdateProfileDto } from './dto/update-profile.dto';
 export class UsersService {
   constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
 
-  create(dto: CreateUserDto) {
-    return this.userModel.create(dto);
+  async create(dto: CreateUserDto) {
+    if (!dto.tableNumber) {
+      throw new BadRequestException('Table number is required');
+    }
+
+    const user = await this.userModel.findOne({ tableNumber: dto.tableNumber }).exec();
+
+    if (user) {
+      throw new BadRequestException('User with this table number already exists');
+    }
+
+    return await this.userModel.create(dto);
   }
 
-  findAll() {
+  async findAll() {
     return this.userModel.find().populate('branch').populate('department').exec();
   }
 
-  findByTableNumber(tableNumber: number) {
+  async findByTableNumber(tableNumber: number) {
     return this.userModel.findOne({ tableNumber }).exec();
   }
 

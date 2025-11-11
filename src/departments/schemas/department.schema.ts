@@ -6,8 +6,6 @@ export type DepartmentDocument = HydratedDocument<Department>;
 
 @Schema({ timestamps: true })
 export class Department {
-  @Prop({ default: () => uuid() })
-  id: string;
 
   @Prop({ required: true })
   name: string;

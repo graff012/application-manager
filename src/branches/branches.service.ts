@@ -1,4 +1,4 @@
-import { Injectable, ConflictException } from '@nestjs/common';
+import { Injectable, ConflictException, BadRequestException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Branch, BranchDocument } from './schemas/branch.schema';
@@ -11,16 +11,36 @@ export class BranchesService {
   ) {}
 
   async create(dto: CreateBranchDto) {
-    try {
-      return this.branchModel.create(dto);
-    } catch (err) {
-      if (err.code === '11000') {
-        throw new ConflictException('Branch with this name already exists');
-      }
+    const branch = await this.branchModel.findOne({ name: dto.name }).exec();
+    if (branch) {
+      throw new ConflictException('Branch with this name already exists');
     }
+
+    return this.branchModel.create(dto);
   }
 
   findAll() {
     return this.branchModel.find().exec();
+  }
+
+  findOne(id: string) {
+    if (!id) {
+      throw new BadRequestException('Branch id is required');
+    }
+    return this.branchModel.findById(id).exec();
+  }
+
+  update(id: string, dto: CreateBranchDto) {
+    if (!id) {
+      throw new BadRequestException('Branch id is required');
+    }
+    return this.branchModel.findByIdAndUpdate(id, dto, { new: true }).exec();
+  }
+
+  delete(id: string) {
+    if (!id) {
+      throw new BadRequestException('Branch id is required');
+    }
+    return this.branchModel.findByIdAndDelete(id).exec();
   }
 }

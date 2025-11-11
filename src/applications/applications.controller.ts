@@ -41,6 +41,11 @@ export class ApplicationsController {
     return this.applicationsService.findAll(filter);
   }
 
+  @Patch(':id')
+  update(@Param('id') id: string, @Body() body: CreateApplicationDto) {
+    return this.applicationsService.updateApplication(id, body);
+  }
+
   @Patch(':id/status')
   updateStatus(@Param('id') id: string, @Body() body: UpdateStatusDto) {
     return this.applicationsService.updateStatus(id, body.status);

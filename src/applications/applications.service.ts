@@ -110,6 +110,13 @@ export class ApplicationsService {
       .exec();
   }
 
+  async updateApplication(id: string, dto: CreateApplicationDto) {
+    const updated = await this.appModel
+      .findByIdAndUpdate(id, dto, { new: true })
+      .exec();
+    return updated;
+  }
+
   async updateStatus(id: string, status: string) {
     const updated = await this.appModel
       .findByIdAndUpdate(id, { status }, { new: true })
