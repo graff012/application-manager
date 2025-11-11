@@ -547,6 +547,16 @@ POST {{base_url}}/api/positions
 Authorization: Bearer {{admin_token}}
 Content-Type: application/json
 
+Format change_to_<status>
+
+Valid permissions (exact strings):
+
+change_to_new
+change_to_assigned
+change_to_progressing
+change_to_completed
+change_to_rejected
+
 {
   "name": "Technician",
   "permissions": [
@@ -569,6 +579,7 @@ Content-Type: application/json
   "email": "jane@example.com",
   "password": "password123",
   "position": "{{position_id}}",
+  "status": "active" or "inactive"
   "branch": "{{branch_id}}",
   "department": "{{department_id}}"
 }
