@@ -6,9 +6,11 @@ import { InventoryService } from './inventory.service';
 import { InventoryController } from './inventory.controller';
 import { Inventory, InventorySchema } from './schemas/inventory.schema';
 import { User, UserSchema } from '../users/schemas/user.schema';
+import { CommonModule } from '../common/common.module';
 
 @Module({
   imports: [
+    CommonModule,
     MongooseModule.forFeature([
       { name: Inventory.name, schema: InventorySchema },
       { name: User.name, schema: UserSchema },

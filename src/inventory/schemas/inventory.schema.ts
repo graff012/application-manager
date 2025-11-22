@@ -24,6 +24,9 @@ export class Inventory {
   @Prop({ type: Types.ObjectId, ref: 'User' })
   assignedTo?: Types.ObjectId;
 
+  @Prop({ type: [{ type: Types.ObjectId, ref: 'Tag' }], default: [] })
+  tags?: Types.ObjectId[];
+
   @Prop({ type: Types.ObjectId, ref: 'Branch' })
   branch?: Types.ObjectId;
 
@@ -33,10 +36,17 @@ export class Inventory {
   @Prop({ enum: ['active', 'repair', 'broken'], default: 'active' })
   status: string;
 
+  @Prop()
+  qrCodeUrl: string;
+
   @Prop({
     type: [
       {
-        action: { type: String, enum: ['assigned', 'repair', 'returned', 'broken'], required: true },
+        action: {
+          type: String,
+          enum: ['assigned', 'repair', 'returned', 'broken'],
+          required: true,
+        },
         by: { type: Types.ObjectId, refPath: 'history.byModel' },
         byModel: { type: String, enum: ['User', 'Employee'], required: true },
         at: { type: Date, default: () => new Date() },

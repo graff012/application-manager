@@ -6,7 +6,7 @@
 
 Ariza Manager is a backend API built with **NestJS** (TypeScript) that helps organizations manage:
 - **Applications (Ariza)** - User requests/tickets with status tracking
-- **Inventory** - Asset management with assignment history
+- **Inventory** - Asset management with assignment history and QR code integration
 - **Users & Employees** - User profiles and employee management
 - **Organizations** - Branches and departments structure
 
@@ -225,6 +225,7 @@ src/
 - Register assets with unique inventory numbers
 - Track asset status (active/repair/broken)
 - Assign assets to users
+- Generate and manage QR codes for quick asset identification
 - Maintain complete history of assignments and status changes
 - Upload asset images to local storage
 
@@ -233,6 +234,8 @@ src/
 - `GET /api/inventory` - List all inventory
 - `GET /api/inventory/:id` - Get single item with history
 - `PATCH /api/inventory/:id` - Update item (status, assignment, etc.)
+- `GET /api/inventory/qr/:inventoryNumber` - Get inventory details via QR code
+- `GET /api/inventory/qrcode/:inventoryNumber/download` - Download QR code image
 
 **Schema Fields:**
 ```typescript
@@ -242,6 +245,7 @@ src/
   inventoryNumber: string, // Unique ID (e.g., "2000102")
   serial?: string,         // Serial number (optional)
   images: string[],        // Local image file paths
+  qrCodeUrl?: string,      // Path to generated QR code image
   assignedTo?: ObjectId,   // Current user
   branch?: ObjectId,
   department?: ObjectId,
@@ -261,6 +265,9 @@ src/
 - ✅ Tracks all assignments and reassignments
 - ✅ Records status changes (repair, broken, etc.)
 - ✅ Logs who made each change
+- ✅ Generates QR code on inventory creation
+- ✅ QR codes link to inventory details page
+- ✅ Downloadable QR code images for printing
 
 ---
 
@@ -736,7 +743,22 @@ Save the returned `_id` as `inventory_id`
 
 ---
 
-#### Step 10: Update Inventory Status
+#### Step 10: Access Inventory via QR Code
+
+1. **Scan the QR Code**
+   - QR codes are automatically generated when a new inventory item is created
+   - The QR code contains a URL to view the inventory details
+   - Example URL: `https://yourapp.com/api/inventory/qr/2000102`
+
+2. **Download QR Code**
+   ```http
+   GET {{base_url}}/api/inventory/qrcode/{{inventory_number}}/download
+   Authorization: Bearer {{employee_token}}
+   ```
+   - This will download the QR code image file
+   - The QR code can be printed and attached to the physical asset
+
+#### Step 11: Update Inventory Status
 
 ```http
 PATCH {{base_url}}/api/inventory/{{inventory_id}}
@@ -752,7 +774,7 @@ This adds a history entry automatically!
 
 ---
 
-#### Step 11: Get Inventory with History
+#### Step 12: Get Inventory with History
 
 ```http
 GET {{base_url}}/api/inventory/{{inventory_id}}

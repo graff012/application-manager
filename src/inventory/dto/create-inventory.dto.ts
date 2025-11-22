@@ -1,12 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  IsInt,
-  IsMongoId,
-  IsNotEmpty,
-  IsOptional,
-  IsString,
-} from 'class-validator';
-import { Type } from 'class-transformer';
+import { IsArray, IsMongoId, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class CreateInventoryDto {
   @ApiProperty({ example: 'Canon mf3010' })
@@ -37,4 +30,10 @@ export class CreateInventoryDto {
   @IsOptional()
   @IsMongoId()
   department?: string;
+
+  @ApiProperty({ required: false, type: [String] })
+  @IsOptional()
+  @IsArray()
+  @IsMongoId({ each: true })
+  tags?: string[];
 }
