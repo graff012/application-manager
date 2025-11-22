@@ -12,6 +12,7 @@ import { AuthModule } from './auth/auth.module';
 import { InventoryModule } from './inventory/inventory.module';
 import { DatabaseModule } from './database/database.module';
 import { TagsModule } from './tags/tags.module';
+import { ToolsModule } from './tools/tools.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { TagsModule } from './tags/tags.module';
     TelegramModule,
     AuthModule,
     TagsModule,
+    ToolsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
