@@ -17,7 +17,7 @@ export class InventoryController {
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FilesInterceptor('images', 10))
   async create(@Body() dto: CreateInventoryDto, @UploadedFiles() files: any[], @Request() req) {
-    const urls = (files || []).map((f: any) => f.location).filter(Boolean);
+    const urls = (files || []).map((f: any) => f.path).filter(Boolean);
     const employeeId = req.user?.role === 'employee' || req.user?.role === 'admin' ? req.user.userId : undefined;
     return this.inventoryService.create(dto, urls, employeeId);
   }
@@ -41,7 +41,7 @@ export class InventoryController {
     @UploadedFiles() files: any[],
     @Request() req,
   ) {
-    const urls = (files || []).map((f: any) => f.location).filter(Boolean);
+    const urls = (files || []).map((f: any) => f.path).filter(Boolean);
     const employeeId = req.user?.role === 'employee' || req.user?.role === 'admin' ? req.user.userId : undefined;
     return this.inventoryService.update(id, dto, urls.length ? urls : undefined, employeeId);
   }

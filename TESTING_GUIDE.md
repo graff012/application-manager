@@ -12,6 +12,18 @@ open http://localhost:3000/docs
 
 ---
 
+## Authorization and Role Rules for Structure
+
+- Only admins (admin_token) can create, edit, or delete:
+  - Branches (/api/branches)
+  - Departments (/api/departments)
+  - Positions (/api/positions)
+  - Employees (/api/employees)
+  - Users (/api/users)
+- Employees and users may only view these entities, and users can update their own profile via PATCH `/api/users/profile`.
+
+---
+
 ## Test Scenario 1: User Profile Management
 
 ### 1.1 Create a User
@@ -111,7 +123,7 @@ department: 673c1234567890abcdef5678
 room: 201
 issue: Printer not working
 issueComment: Paper jam
-images: [file1.jpg, file2.jpg]
+images: [file1.jpg, file2.jpg] (stored in uploads/)
 ```
 
 **Expected:**
@@ -247,7 +259,7 @@ serial: SN123456789
 user: 673c1234567890abcdef1234
 branch: 673c1234567890abcdef1234
 department: 673c1234567890abcdef5678
-images: [photo1.jpg]
+images: [photo1.jpg] (stored in uploads/)
 ```
 
 **Expected:**

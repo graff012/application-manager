@@ -12,7 +12,7 @@ Ariza Manager is a backend API built with **NestJS** (TypeScript) that helps org
 
 **Key Features:**
 - 🔐 JWT Authentication (Users, Employees, Admins)
-- 📁 File uploads to AWS S3
+- 📁 File uploads to local "/uploads" folder
 - 📊 Complete history tracking for all changes
 - 🔔 Telegram notifications (optional)
 - 🌐 Real-time updates via WebSocket
@@ -24,7 +24,7 @@ Ariza Manager is a backend API built with **NestJS** (TypeScript) that helps org
 
 - **Framework:** NestJS 11.x (Node.js + TypeScript)
 - **Database:** MongoDB (with Mongoose ODM)
-- **Storage:** AWS S3 (for file uploads)
+- **Storage:** Local filesystem (project root `/uploads`)
 - **Authentication:** JWT (JSON Web Tokens)
 - **Validation:** class-validator + class-transformer
 - **Real-time:** Socket.IO (WebSocket)
@@ -41,7 +41,6 @@ Make sure you have installed:
 - **Node.js** (v18 or higher)
 - **npm** or **yarn**
 - **MongoDB** (local or Atlas cloud)
-- **AWS Account** (for S3 storage)
 
 ### Step 1: Clone & Install
 
@@ -77,11 +76,7 @@ PORT=3000
 # JWT Secret (use a strong random string)
 JWT_SECRET=your_super_secret_jwt_key_change_this
 
-# AWS S3 Configuration
-AWS_S3_ACCESS_KEY_ID=your_aws_access_key
-AWS_S3_SECRET_ACCESS_KEY=your_aws_secret_key
-AWS_S3_REGION=us-east-1
-AWS_S3_BUCKET_NAME=your-bucket-name
+# No S3 needed — images saved to local uploads/
 
 # Telegram (Optional - leave empty to disable)
 TELEGRAM_BOT_TOKEN=your_bot_token_from_botfather
@@ -150,7 +145,7 @@ src/
 - Maintain inventory assignment history
 
 **Key Endpoints:**
-- `POST /api/users` - Create new user
+- `POST /api/users` - (Admin only) Create new user
 - `GET /api/users` - List all users
 - `PATCH /api/users/profile` - Update user profile (JWT required)
 
@@ -160,9 +155,10 @@ src/
   id: string,              // UUID
   tableNumber: number,     // Unique identifier (used for login)
   fullName: string,
-  phone?: string,          // Optional phone number
+  phone: string,           // Required phone number (9 digits)
+  passportNumber: string,  // Required passport number (14 digits, jshshir)
   gender?: string,         // 'male' | 'female' | 'other'
-  profileComplete: boolean, // Auto-set when phone & gender provided
+  profileComplete: boolean, // Auto-set when required fields are provided
   branch: ObjectId,        // Reference to Branch
   department: ObjectId,    // Reference to Department
   inventoryHistory: []     // History of inventory assignments
@@ -179,7 +175,7 @@ src/
 - Track status changes (new → assigned → progressing → completed/rejected)
 - Assign applications to employees
 - Maintain complete history of all changes
-- Upload supporting images to S3
+- Upload supporting images to local storage
 - Send Telegram notifications
 
 **Key Endpoints:**
@@ -201,7 +197,7 @@ src/
   room: string,            // Room/location
   issue: string,           // Problem description
   issueComment?: string,
-  images: string[],        // S3 URLs
+  images: string[],        // File paths (relative to `/uploads`)
   inventory?: ObjectId,    // Related inventory item
   assignedTo?: ObjectId,   // Assigned employee
   history: [{              // Complete audit trail
@@ -230,7 +226,7 @@ src/
 - Track asset status (active/repair/broken)
 - Assign assets to users
 - Maintain complete history of assignments and status changes
-- Upload asset images to S3
+- Upload asset images to local storage
 
 **Key Endpoints:**
 - `POST /api/inventory` - Create inventory item (with file upload)
@@ -245,7 +241,7 @@ src/
   name: string,            // Asset name (e.g., "Canon MF3010")
   inventoryNumber: string, // Unique ID (e.g., "2000102")
   serial?: string,         // Serial number (optional)
-  images: string[],        // S3 URLs
+  images: string[],        // Local image file paths
   assignedTo?: ObjectId,   // Current user
   branch?: ObjectId,
   department?: ObjectId,
@@ -278,7 +274,7 @@ src/
 - WebSocket gateway for real-time notifications
 
 **Key Endpoints:**
-- `POST /api/employees` - Create employee
+- `POST /api/employees` - (Admin only) Create employee
 - `GET /api/employees` - List all employees
 - `GET /api/applications/assigned` - Get my assigned applications
 
@@ -293,6 +289,8 @@ src/
   status: string,          // 'active' | 'inactive'
   branch?: ObjectId,
   department?: ObjectId,
+  phone: string,           // Required phone number (9 digits)
+  passportNumber: string,  // Required passport number (14 digits, jshshir)
   assignedApplications: ObjectId[], // Array of application IDs
   role: string             // 'employee' (default)
 }
@@ -328,11 +326,11 @@ Employee/Admin Login:
 **Purpose:** Organize users and employees by location and department
 
 **Branches** (`src/branches/`):
-- `POST /api/branches` - Create branch
+- `POST /api/branches` - (Admin only) Create branch
 - `GET /api/branches` - List branches
 
 **Departments** (`src/departments/`):
-- `POST /api/departments` - Create department
+- `POST /api/departments` - (Admin only) Create department
 - `GET /api/departments` - List departments
 
 ---
@@ -407,6 +405,7 @@ Employee/Admin Login:
 3. **Admins**
    - Login with email + password
    - Full access to everything
+   - Only admins can create/update/delete: branches, departments, positions, employees, users (except self-profile update by users).
    - Auto-created on startup from .env
 
 ### How JWT Works:
@@ -449,7 +448,7 @@ Add `Authorization: Bearer <token>` header to requests
 
 #### Step 1: Create Organization Structure
 
-**1.1 Create Branch**
+**1.1 Create Branch (Admin only — must use admin_token)**
 ```http
 POST {{base_url}}/api/branches
 Content-Type: application/json
@@ -460,7 +459,7 @@ Content-Type: application/json
 ```
 Save the returned `_id` as `branch_id`
 
-**1.2 Create Department**
+**1.2 Create Department (Admin only — must use admin_token)**
 ```http
 POST {{base_url}}/api/departments
 Content-Type: application/json

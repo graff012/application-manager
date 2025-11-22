@@ -31,7 +31,7 @@ export class ApplicationsController {
     @Body() dto: CreateApplicationDto,
     @UploadedFiles() files: any[],
   ) {
-    const urls = (files || []).map((f: any) => f.location).filter(Boolean);
+    const urls = (files || []).map((f: any) => f.path).filter(Boolean);
     return this.applicationsService.create(dto, urls);
   }
 

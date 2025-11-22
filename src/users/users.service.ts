@@ -56,4 +56,10 @@ export class UsersService {
     await user.save();
     return user;
   }
+
+  async remove(id: string) {
+    const result = await this.userModel.deleteOne({ id }).exec();
+    if (result.deletedCount === 0) throw new NotFoundException('User not found');
+    return { deleted: true };
+  }
 }

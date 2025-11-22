@@ -1,4 +1,13 @@
-import { IsString, IsEmail, IsNotEmpty, IsEnum, IsOptional, IsMongoId } from 'class-validator';
+import {
+  IsString,
+  IsEmail,
+  IsNotEmpty,
+  IsEnum,
+  IsOptional,
+  IsMongoId,
+  Matches,
+  Length,
+} from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateEmployeeDto {
@@ -36,4 +45,16 @@ export class CreateEmployeeDto {
   @IsMongoId()
   @IsOptional()
   department?: string;
+
+  @ApiProperty()
+  @IsString()
+  @IsNotEmpty()
+  @Matches(/^[0-9]{9}$/, { message: 'Phone number must be 9 digits' })
+  phone: string;
+
+  @ApiProperty()
+  @IsString()
+  @IsNotEmpty()
+  @Length(14, 14, { message: 'Passport number must be 14 characters' })
+  passportNumber: string;
 }

@@ -11,8 +11,6 @@ import { TelegramModule } from '../telegram/telegram.module';
 import { EmployeesModule } from '../employees/employees.module';
 import { PositionsModule } from '../positions/positions.module';
 import { EmployeeGateway } from '../employees/employee.gateway';
-import { S3Client } from '@aws-sdk/client-s3';
-import multerS3 from 'multer-s3';
 
 @Module({
   imports: [
@@ -21,32 +19,15 @@ import multerS3 from 'multer-s3';
     EmployeesModule,
     PositionsModule,
     ConfigModule,
-    MulterModule.registerAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: async (config: ConfigService) => {
-        const s3 = new S3Client({
-          region: config.get<string>('AWS_S3_REGION'),
-          credentials: {
-            accessKeyId: config.get<string>('AWS_S3_ACCESS_KEY_ID') || '',
-            secretAccessKey: config.get<string>('AWS_S3_SECRET_ACCESS_KEY') || '',
-          },
-        });
-        const bucket = config.get<string>('AWS_S3_BUCKET_NAME') || '';
-        return {
-          storage: multerS3({
-            s3,
-            bucket,
-            // acl removed to avoid AccessControlListNotSupported when Object Ownership enforces bucket owner
-            contentType: multerS3.AUTO_CONTENT_TYPE,
-            key: (req, file, cb) => {
-              const ext = file.originalname.split('.').pop();
-              const name = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-              cb(null, name);
-            },
-          }) as any,
-        };
-      },
+    MulterModule.register({
+      storage: require('multer').diskStorage({
+        destination: './uploads',
+        filename: (req, file, cb) => {
+          const ext = file.originalname.split('.').pop();
+          const name = `${Date.now()}-${Math.round(Math.random() * 1e9)}.${ext}`;
+          cb(null, name);
+        },
+      }),
     }),
   ],
   controllers: [ApplicationsController, ApplicationsEmployeeController, ApplicationsUserController],

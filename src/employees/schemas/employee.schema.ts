@@ -32,6 +32,12 @@ export class Employee {
   @Prop({ type: Types.ObjectId, ref: 'Department' })
   department: Types.ObjectId;
 
+  @Prop({ required: true })
+  phone: string;
+
+  @Prop({ required: true, unique: true })
+  passportNumber: string;
+
   @Prop({ type: [{ type: Types.ObjectId, ref: 'Application' }], default: [] })
   assignedApplications: Types.ObjectId[];
 
