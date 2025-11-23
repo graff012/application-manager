@@ -18,7 +18,6 @@ export class EmployeesService {
   findAll() {
     return this.employeeModel
       .find()
-      .populate('position')
       .populate('branch')
       .populate('department')
       .populate('assignedApplications')
@@ -28,7 +27,6 @@ export class EmployeesService {
   async findOne(id: string) {
     const employee = await this.employeeModel
       .findById(id)
-      .populate('position')
       .populate('branch')
       .populate('department')
       .populate('assignedApplications')
@@ -38,7 +36,7 @@ export class EmployeesService {
   }
 
   async findByEmail(email: string) {
-    return this.employeeModel.findOne({ email }).populate('position').exec();
+    return this.employeeModel.findOne({ email }).exec();
   }
 
   async update(id: string, dto: UpdateEmployeeDto) {
@@ -47,7 +45,6 @@ export class EmployeesService {
     }
     const employee = await this.employeeModel
       .findByIdAndUpdate(id, dto, { new: true })
-      .populate('position')
       .populate('branch')
       .populate('department')
       .exec();

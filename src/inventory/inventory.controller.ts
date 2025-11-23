@@ -1,4 +1,17 @@
-import { Body, Controller, Get, Param, Patch, Post, Request, Res, UploadedFiles, UseGuards, UseInterceptors, NotFoundException } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Request,
+  Res,
+  UploadedFiles,
+  UseGuards,
+  UseInterceptors,
+  NotFoundException,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { InventoryService } from './inventory.service';
@@ -26,9 +39,16 @@ export class InventoryController {
   @Post()
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FilesInterceptor('images', 10))
-  async create(@Body() dto: CreateInventoryDto, @UploadedFiles() files: any[], @Request() req) {
+  async create(
+    @Body() dto: CreateInventoryDto,
+    @UploadedFiles() files: any[],
+    @Request() req,
+  ) {
     const urls = (files || []).map((f: any) => f.path).filter(Boolean);
-    const employeeId = req.user?.role === 'employee' || req.user?.role === 'admin' ? req.user.userId : undefined;
+    const employeeId =
+      req.user?.role === 'employee' || req.user?.role === 'admin'
+        ? req.user.userId
+        : undefined;
     return this.inventoryService.create(dto, urls, employeeId);
   }
 
@@ -52,8 +72,16 @@ export class InventoryController {
     @Request() req,
   ) {
     const urls = (files || []).map((f: any) => f.path).filter(Boolean);
-    const employeeId = req.user?.role === 'employee' || req.user?.role === 'admin' ? req.user.userId : undefined;
-    return this.inventoryService.update(id, dto, urls.length ? urls : undefined, employeeId);
+    const employeeId =
+      req.user?.role === 'employee' || req.user?.role === 'admin'
+        ? req.user.userId
+        : undefined;
+    return this.inventoryService.update(
+      id,
+      dto,
+      urls.length ? urls : undefined,
+      employeeId,
+    );
   }
 
   @Get('qr/:inventoryNumber')
@@ -68,7 +96,8 @@ export class InventoryController {
     @Param('inventoryNumber') inventoryNumber: string,
     @Res() res: Response,
   ) {
-    const inventory = await this.inventoryService.findByInventoryNumber(inventoryNumber);
+    const inventory =
+      await this.inventoryService.findByInventoryNumber(inventoryNumber);
     if (!inventory || !inventory.qrCodeUrl) {
       throw new NotFoundException('QR code not found');
     }

@@ -29,6 +29,9 @@ export class User {
   @Prop({ default: false })
   profileComplete: boolean;
 
+  @Prop({ required: false })
+  birthday?: Date;
+
   @Prop({
     type: [
       {

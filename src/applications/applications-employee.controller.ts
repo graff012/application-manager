@@ -2,7 +2,6 @@ import { Controller, Get, Patch, Param, Body, UseGuards, Request } from '@nestjs
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { ApplicationsService } from './applications.service';
 import { EmployeesService } from '../employees/employees.service';
-import { PositionsService } from '../positions/positions.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -16,7 +15,6 @@ export class ApplicationsEmployeeController {
   constructor(
     private readonly applicationsService: ApplicationsService,
     private readonly employeesService: EmployeesService,
-    private readonly positionsService: PositionsService,
   ) {}
 
   @Get('assigned')
@@ -42,19 +40,12 @@ export class ApplicationsEmployeeController {
   async updateStatus(@Param('id') id: string, @Body() dto: UpdateStatusDto, @Request() req) {
     const employeeId = req.user.userId;
     const employee = await this.employeesService.findOne(employeeId);
-    const position = await this.positionsService.findOne(employee.position.toString());
-
-    // Check permission
-    const permissionKey = `change_to_${dto.status}`;
-    if (!position.permissions.includes(permissionKey) && req.user.role !== 'admin') {
-      throw new Error(`You don't have permission to change status to ${dto.status}`);
-    }
-
     return this.applicationsService.updateApplicationStatus(
       id,
       dto.status,
       employeeId,
       employee.fullName,
+      dto.comment,
     );
   }
 }

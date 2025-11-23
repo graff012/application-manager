@@ -5,12 +5,14 @@
 ## 🚀 What is This Project?
 
 Ariza Manager is a backend API built with **NestJS** (TypeScript) that helps organizations manage:
+
 - **Applications (Ariza)** - User requests/tickets with status tracking
 - **Inventory** - Asset management with assignment history and QR code integration
 - **Users & Employees** - User profiles and employee management
 - **Organizations** - Branches and departments structure
 
 **Key Features:**
+
 - 🔐 JWT Authentication (Users, Employees, Admins)
 - 📁 File uploads to local "/uploads" folder
 - 📊 Complete history tracking for all changes
@@ -38,6 +40,7 @@ Ariza Manager is a backend API built with **NestJS** (TypeScript) that helps org
 ### Prerequisites
 
 Make sure you have installed:
+
 - **Node.js** (v18 or higher)
 - **npm** or **yarn**
 - **MongoDB** (local or Atlas cloud)
@@ -137,20 +140,24 @@ src/
 ### Module Breakdown
 
 #### 1. **Users Module** (`src/users/`)
+
 **Purpose:** Manage end-users (clients/employees who submit requests)
 
 **What it does:**
+
 - Create users with unique table numbers
 - User profile management (phone, gender)
 - Track profile completion status
 - Maintain inventory assignment history
 
 **Key Endpoints:**
+
 - `POST /api/users` - (Admin only) Create new user
 - `GET /api/users` - List all users
 - `PATCH /api/users/profile` - Update user profile (JWT required)
 
 **Schema Fields:**
+
 ```typescript
 {
   _id: ObjectId,           // MongoDB primary key
@@ -169,9 +176,11 @@ src/
 ---
 
 #### 2. **Applications Module** (`src/applications/`)
+
 **Purpose:** Handle user requests/tickets (Ariza) with full lifecycle tracking
 
 **What it does:**
+
 - Create applications with auto-generated index (#00001-2025)
 - Track status changes (new → assigned → progressing → completed/rejected)
 - Assign applications to employees
@@ -180,13 +189,15 @@ src/
 - Send Telegram notifications
 
 **Key Endpoints:**
+
 - `POST /api/applications` - Create application (with file upload)
 - `GET /api/applications` - List all applications
 - `GET /api/applications/:id` - Get single application with history
-- `PATCH /api/applications/:id/assign` - Assign to employee
+- `PATCH /api/applications/:id/assign` - Assign the application to the **currently logged-in employee/admin** (no body, uses JWT)
 - `PATCH /api/applications/:id/status` - Update status
 
 **Schema Fields:**
+
 ```typescript
 {
   _id: ObjectId,
@@ -212,6 +223,7 @@ src/
 ```
 
 **History Tracking:**
+
 - ✅ Auto-creates history on application creation
 - ✅ Tracks who assigned it to whom
 - ✅ Records every status change with timestamp
@@ -220,9 +232,11 @@ src/
 ---
 
 #### 3. **Inventory Module** (`src/inventory/`)
+
 **Purpose:** Manage organizational assets with assignment and status tracking
 
 **What it does:**
+
 - Register assets with unique inventory numbers
 - Track asset status (active/repair/broken)
 - Assign assets to users
@@ -231,6 +245,7 @@ src/
 - Upload asset images to local storage
 
 **Key Endpoints:**
+
 - `POST /api/inventory` - Create inventory item (with file upload)
 - `GET /api/inventory` - List all inventory
 - `GET /api/inventory/:id` - Get single item with history
@@ -239,6 +254,7 @@ src/
 - `GET /api/inventory/qrcode/:inventoryNumber/download` - Download QR code image
 
 **Schema Fields:**
+
 ```typescript
 {
   _id: ObjectId,
@@ -247,12 +263,14 @@ src/
   serial?: string,         // Serial number (optional)
   images: string[],        // Local image file paths
   qrCodeUrl?: string,      // Path to generated QR code image
-  assignedTo?: ObjectId,   // Current user
+  assignedTo?: ObjectId,   // Current assignee (User or Employee)
+  assignedToModel?: string,// 'User' | 'Employee'
+  assignedAt?: Date,       // When it was attached to the current assignee
   tags?: ObjectId[],       // Optional special tags linked from Tags module
   tools?: ObjectId[],      // Optional tools linked from Tools module
   branch?: ObjectId,
   department?: ObjectId,
-  status: string,          // 'active' | 'repair' | 'broken'
+  status: string,          // Physical status: 'active' | 'repair' | 'broken' | 'inactive'
   history: [{              // Complete audit trail
     action: string,        // 'assigned' | 'repair' | 'returned' | 'broken'
     by: ObjectId,          // User or Employee who made change
@@ -264,6 +282,7 @@ src/
 ```
 
 **History Tracking:**
+
 - ✅ Auto-creates history on inventory creation
 - ✅ Tracks all assignments and reassignments
 - ✅ Records status changes (repair, broken, etc.)
@@ -271,19 +290,52 @@ src/
 - ✅ Generates QR code on inventory creation
 - ✅ QR codes link to inventory details page
 - ✅ Downloadable QR code images for printing
- - ✅ Supports optional special tags and tools references
+- ✅ Supports optional special tags and tools references
 
 ---
 
-#### 4. **Tools Module** (`src/tools/`)
+#### 4. **Tags Module** (`src/tags/`)
+
+**Purpose:** Define reusable labels you can attach to inventory items.
+
+**What it does:**
+
+- Let admins/employees create a catalog of tags (e.g., "Critical", "For Office", "Needs Calibration").
+- Tags are then linked from inventory items via the `tags` field.
+
+**Key Endpoints:**
+
+- `POST /api/tags` - Create tag
+- `GET /api/tags` - List all tags
+- `GET /api/tags/:id` - Get a single tag
+- `PATCH /api/tags/:id` - Update tag
+- `DELETE /api/tags/:id` - Delete tag
+
+**Schema Fields:**
+
+```typescript
+{
+  _id: ObjectId,
+  name: string,        // Tag name (e.g., "Critical", "Spare", "Printer")
+  createdAt: Date,
+  updatedAt: Date,
+}
+```
+
+---
+
+#### 5. **Tools Module** (`src/tools/`)
+
 **Purpose:** Manage tools that are required for or associated with inventory
 
 **What it does:**
+
 - Register tools with unique tool numbers
 - Optionally track tool serial numbers
 - Allow employees/admins to manage tool catalog
 
 **Key Endpoints:**
+
 - `POST /api/tools` - Create tool
 - `GET /api/tools` - List all tools
 - `GET /api/tools/:id` - Get a single tool
@@ -291,6 +343,7 @@ src/
 - `DELETE /api/tools/:id` - Delete tool
 
 **Schema Fields:**
+
 ```typescript
 {
   _id: ObjectId,
@@ -305,20 +358,24 @@ src/
 ---
 
 #### 5. **Employees Module** (`src/employees/`)
+
 **Purpose:** Manage employees who handle applications
 
 **What it does:**
+
 - Create employee accounts with email/password
 - Assign positions with specific permissions
 - Track assigned applications
 - WebSocket gateway for real-time notifications
 
 **Key Endpoints:**
+
 - `POST /api/employees` - (Admin only) Create employee
 - `GET /api/employees` - List all employees
 - `GET /api/applications/assigned` - Get my assigned applications
 
 **Schema Fields:**
+
 ```typescript
 {
   _id: ObjectId,
@@ -339,22 +396,26 @@ src/
 ---
 
 #### 5. **Auth Module** (`src/auth/`)
+
 **Purpose:** Handle authentication for all user types
 
 **What it does:**
-- User login (by tableNumber, no password)
+
+- User login (by tableNumber + passportNumber, no password)
 - Employee/Admin login (email + password)
 - JWT token generation and validation
 - Role-based access control
 
 **Key Endpoints:**
+
 - `POST /api/auth/login` - User login (tableNumber)
 - `POST /api/auth/admin/login` - Employee/Admin login (email + password)
 
 **Authentication Flow:**
+
 ```
 User Login:
-  tableNumber → JWT (userId, tableNumber)
+  tableNumber + passportNumber → find user → JWT (userId, tableNumber)
 
 Employee/Admin Login:
   email + password → bcrypt verify → JWT (userId, email, role)
@@ -363,27 +424,33 @@ Employee/Admin Login:
 ---
 
 #### 6. **Branches & Departments Modules**
+
 **Purpose:** Organize users and employees by location and department
 
 **Branches** (`src/branches/`):
+
 - `POST /api/branches` - (Admin only) Create branch
 - `GET /api/branches` - List branches
 
 **Departments** (`src/departments/`):
+
 - `POST /api/departments` - (Admin only) Create department
 - `GET /api/departments` - List departments
 
 ---
 
 #### 7. **Positions Module** (`src/positions/`)
+
 **Purpose:** Define employee roles with specific permissions
 
 **What it does:**
+
 - Create positions (e.g., "Technician", "Manager")
 - Define permissions for each position
 - Control what status changes employees can make
 
 **Permissions Example:**
+
 ```typescript
 {
   name: "Technician",
@@ -397,9 +464,11 @@ Employee/Admin Login:
 ---
 
 #### 8. **Admins Module** (`src/admins/`)
+
 **Purpose:** Super admin management
 
 **What it does:**
+
 - Auto-create admin user on startup (from .env)
 - Full access to all endpoints
 - Manage other admins
@@ -407,9 +476,11 @@ Employee/Admin Login:
 ---
 
 #### 9. **Telegram Module** (`src/telegram/`)
+
 **Purpose:** Send notifications to Telegram
 
 **What it does:**
+
 - Send notifications when applications are created
 - Send notifications when status changes
 - Optional - can be disabled by leaving TELEGRAM_CHAT_ID empty
@@ -417,9 +488,11 @@ Employee/Admin Login:
 ---
 
 #### 10. **Database Module** (`src/database/`)
+
 **Purpose:** Database initialization and seeding
 
 **What it does:**
+
 - Auto-create admin user on first startup
 - Check if admin already exists (no duplicates)
 - Uses credentials from .env file
@@ -489,6 +562,7 @@ Add `Authorization: Bearer <token>` header to requests
 #### Step 1: Create Organization Structure
 
 **1.1 Create Branch (Admin only — must use admin_token)**
+
 ```http
 POST {{base_url}}/api/branches
 Content-Type: application/json
@@ -497,9 +571,11 @@ Content-Type: application/json
   "name": "Head Office"
 }
 ```
+
 Save the returned `_id` as `branch_id`
 
 **1.2 Create Department (Admin only — must use admin_token)**
+
 ```http
 POST {{base_url}}/api/departments
 Content-Type: application/json
@@ -509,6 +585,7 @@ Content-Type: application/json
   "branch": "{{branch_id}}"
 }
 ```
+
 Save the returned `_id` as `department_id`
 
 ---
@@ -516,6 +593,7 @@ Save the returned `_id` as `department_id`
 #### Step 2: Create Users
 
 **2.1 Create a User**
+
 ```http
 POST {{base_url}}/api/users
 Content-Type: application/json
@@ -523,31 +601,38 @@ Content-Type: application/json
 {
   "tableNumber": 101,
   "fullName": "John Doe",
+  "passportNumber": "12345667888888"
   "branch": "{{branch_id}}",
   "department": "{{department_id}}"
 }
 ```
+
 Save the returned `id` as `user_id`
 
 **2.2 Login as User**
+
 ```http
 POST {{base_url}}/api/auth/login
 Content-Type: application/json
 
 {
-  "tableNumber": 101
+  "tableNumber": 101,
+  "passportNumber": 128338838338383
 }
 ```
 
 **Response:**
+
 ```json
 {
   "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 }
 ```
+
 Copy the `access_token` and save it as `user_token` in your environment
 
 **2.3 Update User Profile**
+
 ```http
 PATCH {{base_url}}/api/users/profile
 Authorization: Bearer {{user_token}}
@@ -572,6 +657,7 @@ Content-Type: application/json
   "password": "SecurePassword123"
 }
 ```
+
 (Use the credentials from your .env file)
 
 Save the `access_token` as `admin_token`
@@ -580,34 +666,6 @@ Save the `access_token` as `admin_token`
 
 #### Step 4: Create Employee
 
-**4.1 Create Position First**
-```http
-POST {{base_url}}/api/positions
-Authorization: Bearer {{admin_token}}
-Content-Type: application/json
-
-Format change_to_<status>
-
-Valid permissions (exact strings):
-
-change_to_new
-change_to_assigned
-change_to_progressing
-change_to_completed
-change_to_rejected
-
-{
-  "name": "Technician",
-  "permissions": [
-    "change_to_assigned",
-    "change_to_progressing",
-    "change_to_completed"
-  ]
-}
-```
-Save the returned `_id` as `position_id`
-
-**4.2 Create Employee**
 ```http
 POST {{base_url}}/api/employees
 Authorization: Bearer {{admin_token}}
@@ -617,14 +675,16 @@ Content-Type: application/json
   "fullName": "Jane Smith",
   "email": "jane@example.com",
   "password": "password123",
-  "position": "{{position_id}}",
+  "phone": "phoneNumber"
+  "passportNumber": "14 digit number"
   "status": "active" or "inactive"
   "branch": "{{branch_id}}",
   "department": "{{department_id}}"
 }
 ```
 
-**4.3 Login as Employee**
+**4.1 Login as Employee**
+
 ```http
 POST {{base_url}}/api/auth/admin/login
 Content-Type: application/json
@@ -634,6 +694,7 @@ Content-Type: application/json
   "password": "password123"
 }
 ```
+
 Save the `access_token` as `employee_token`
 
 ---
@@ -658,6 +719,7 @@ images: [Select File] (can add multiple)
 ```
 
 **Response includes history:**
+
 ```json
 {
   "id": "...",
@@ -674,6 +736,7 @@ images: [Select File] (can add multiple)
   ]
 }
 ```
+
 Save the `id` as `application_id`
 
 ---
@@ -685,7 +748,18 @@ PATCH {{base_url}}/api/applications/{{application_id}}/assign
 Authorization: Bearer {{employee_token}}
 ```
 
+This endpoint **does not take a request body**.
+
+It works like this:
+
+- You must be logged in as an **employee or admin** using:
+  - `POST /api/auth/admin/login` with the employee's email + password
+- Use the returned token as `{{employee_token}}` in the `Authorization` header.
+- The backend reads the employee ID from the JWT and **assigns the application to that same employee**.
+- Users (tableNumber/passport login) **cannot** assign applications.
+
 This will:
+
 - Set `assignedTo` to the employee
 - Change status to "assigned"
 - Add history entry
@@ -706,6 +780,29 @@ Content-Type: application/json
 }
 ```
 
+To **reject** an application, you must also provide a rejection comment (reason):
+
+```http
+PATCH {{base_url}}/api/applications/{{application_id}}/status
+Authorization: Bearer {{employee_token}}
+Content-Type: application/json
+
+{
+  "status": "rejected",
+  "comment": "User provided wrong data in the request form"
+}
+```
+
+If you send `status: "rejected"` **without** a non-empty `comment`, the backend will respond with:
+
+```json
+{
+  "statusCode": 400,
+  "message": "Rejection requires a comment (reason).",
+  "error": "Bad Request"
+}
+```
+
 ---
 
 #### Step 8: Get Application with Full History
@@ -716,6 +813,7 @@ Authorization: Bearer {{user_token}}
 ```
 
 **Response shows complete history:**
+
 ```json
 {
   "id": "...",
@@ -776,7 +874,74 @@ Save the returned `_id` as `inventory_id`
 
 ---
 
-#### Step 10: Access Inventory via QR Code
+#### Step 10: Create Tags (for Inventory)
+
+```http
+POST {{base_url}}/api/tags
+Authorization: Bearer {{employee_token_or_admin_token}}
+Content-Type: application/json
+
+{
+  "name": "Printer"
+}
+```
+
+Save the returned `_id` as `tag_printer_id`.
+
+Repeat for other tags, for example:
+
+```http
+POST {{base_url}}/api/tags
+Authorization: Bearer {{employee_token_or_admin_token}}
+Content-Type: application/json
+
+{
+  "name": "Critical"
+}
+```
+
+Save this `_id` as `tag_critical_id`.
+
+---
+
+#### Step 11: Create Tools (for Inventory)
+
+```http
+POST {{base_url}}/api/tools
+Authorization: Bearer {{employee_token_or_admin_token}}
+Content-Type: application/json
+
+{
+  "name": "Screwdriver Set",
+  "toolNumber": "TL-0001",
+  "serial": "SN-TOOL-12345"
+}
+```
+
+Save the returned `_id` as `tool_screwdriver_id`.
+
+---
+
+#### Step 12: Attach Tags and Tools to an Inventory Item
+
+```http
+PATCH {{base_url}}/api/inventory/{{inventory_id}}
+Authorization: Bearer {{employee_token_or_admin_token}}
+Content-Type: application/json
+
+{
+  "tags": ["{{tag_printer_id}}", "{{tag_critical_id}}"],
+  "tools": ["{{tool_screwdriver_id}}"]
+}
+```
+
+Expected:
+
+- Inventory item now includes `tags` and `tools` arrays containing these IDs.
+
+---
+
+#### Step 13: Access Inventory via QR Code
 
 1. **Scan the QR Code**
    - QR codes are automatically generated when a new inventory item is created
@@ -784,14 +949,16 @@ Save the returned `_id` as `inventory_id`
    - Example URL: `https://yourapp.com/api/inventory/qr/2000102`
 
 2. **Download QR Code**
+
    ```http
    GET {{base_url}}/api/inventory/qrcode/{{inventory_number}}/download
    Authorization: Bearer {{employee_token}}
    ```
+
    - This will download the QR code image file
    - The QR code can be printed and attached to the physical asset
 
-#### Step 11: Update Inventory Status
+#### Step 14: Update Inventory Status
 
 ```http
 PATCH {{base_url}}/api/inventory/{{inventory_id}}
@@ -807,7 +974,7 @@ This adds a history entry automatically!
 
 ---
 
-#### Step 12: Get Inventory with History
+#### Step 15: Get Inventory with History
 
 ```http
 GET {{base_url}}/api/inventory/{{inventory_id}}
@@ -815,6 +982,7 @@ Authorization: Bearer {{employee_token}}
 ```
 
 **Response:**
+
 ```json
 {
   "id": "...",
@@ -849,18 +1017,21 @@ Authorization: Bearer {{employee_token}}
 
 **Save Tokens Automatically:**
 In Postman, add this to the "Tests" tab of login requests:
+
 ```javascript
 if (pm.response.code === 200) {
-    const response = pm.response.json();
-    pm.environment.set("user_token", response.access_token);
+  const response = pm.response.json();
+  pm.environment.set('user_token', response.access_token);
 }
 ```
 
 **Use Authorization Tab:**
+
 - Select "Bearer Token" type
 - Enter `{{user_token}}` or `{{employee_token}}`
 
 **File Uploads:**
+
 - Use "form-data" in Body tab
 - For file fields, change type from "Text" to "File"
 - Can upload multiple files with same key name
@@ -947,26 +1118,31 @@ ADMIN_PASSWORD=<strong-password>
 ### Common Issues
 
 **MongoDB Connection Failed**
+
 - Check `MONGO_URI` in .env
 - Ensure MongoDB is running (local) or accessible (Atlas)
 - Verify network/firewall settings
 
 **JWT Token Invalid**
+
 - Ensure `JWT_SECRET` is set in .env
 - Check token hasn't expired
 - Verify Authorization header format: `Bearer <token>`
 
 **File Upload Fails**
+
 - Verify AWS credentials in .env
 - Check S3 bucket exists and has correct permissions
 - Ensure bucket region matches `AWS_S3_REGION`
 
 **Admin Login Fails**
+
 - Check credentials in .env match login request
 - Verify admin was created (check startup logs)
 - Password is case-sensitive
 
 **Swagger Not Loading**
+
 - Ensure app is running on correct port
 - Check `http://localhost:3000/docs` (not `/api/docs`)
 - Clear browser cache
@@ -976,15 +1152,18 @@ ADMIN_PASSWORD=<strong-password>
 ## 📖 Learning Resources
 
 ### NestJS Resources
+
 - [NestJS Documentation](https://docs.nestjs.com)
 - [NestJS Discord](https://discord.gg/G7Qnnhy)
 - [NestJS Courses](https://courses.nestjs.com/)
 
 ### MongoDB Resources
+
 - [MongoDB Documentation](https://docs.mongodb.com/)
 - [Mongoose Documentation](https://mongoosejs.com/docs/)
 
 ### AWS S3 Resources
+
 - [AWS S3 Documentation](https://docs.aws.amazon.com/s3/)
 - [AWS SDK for JavaScript](https://docs.aws.amazon.com/sdk-for-javascript/)
 
@@ -1009,6 +1188,7 @@ This project is **UNLICENSED** - Private project
 ## 👥 Support
 
 For questions or issues:
+
 - Check the documentation files in the project root
 - Review the Swagger API docs at `/docs`
 - Contact the development team

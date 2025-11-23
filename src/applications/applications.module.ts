@@ -9,7 +9,6 @@ import { ApplicationsUserController } from './applications-user.controller';
 import { Application, ApplicationSchema } from './schemas/application.schema';
 import { TelegramModule } from '../telegram/telegram.module';
 import { EmployeesModule } from '../employees/employees.module';
-import { PositionsModule } from '../positions/positions.module';
 import { EmployeeGateway } from '../employees/employee.gateway';
 
 @Module({
@@ -17,11 +16,10 @@ import { EmployeeGateway } from '../employees/employee.gateway';
     MongooseModule.forFeature([{ name: Application.name, schema: ApplicationSchema }]),
     TelegramModule,
     EmployeesModule,
-    PositionsModule,
     ConfigModule,
     MulterModule.register({
       storage: require('multer').diskStorage({
-        destination: './uploads',
+        destination: './uploads/applications',
         filename: (req, file, cb) => {
           const ext = file.originalname.split('.').pop();
           const name = `${Date.now()}-${Math.round(Math.random() * 1e9)}.${ext}`;

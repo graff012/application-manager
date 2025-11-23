@@ -16,9 +16,6 @@ export class Employee {
   @Prop({ required: true })
   password: string;
 
-  @Prop({ type: Types.ObjectId, ref: 'Position', required: true })
-  position: Types.ObjectId;
-
   @Prop({ required: true, enum: ['active', 'inactive'], default: 'active' })
   status: EmployeeStatus;
 

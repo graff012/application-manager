@@ -54,7 +54,6 @@ You should see the Swagger UI interface with all your API endpoints! 🎉
 │  📁 departments                             │
 │  📁 employees                               │
 │  📁 inventory                               │
-│  📁 positions                               │
 │  📁 users                                   │
 └─────────────────────────────────────────────┘
 ```
@@ -417,7 +416,6 @@ Scroll to the bottom to see all data schemas:
 - Branch
 - Department
 - Employee
-- Position
 - Admin
 
 Click any model to see its structure.

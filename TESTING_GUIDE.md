@@ -17,7 +17,6 @@ open http://localhost:3000/docs
 - Only admins (admin_token) can create, edit, or delete:
   - Branches (/api/branches)
   - Departments (/api/departments)
-  - Positions (/api/positions)
   - Employees (/api/employees)
   - Users (/api/users)
 - Employees and users may only view these entities, and users can update their own profile via PATCH `/api/users/profile`.

@@ -17,8 +17,14 @@ export class Inventory {
   @Prop({ type: [String], default: [] })
   images: string[];
 
-  @Prop({ type: Types.ObjectId, ref: 'User' })
+  @Prop({ type: Types.ObjectId, refPath: 'assignedToModel' })
   assignedTo?: Types.ObjectId;
+
+  @Prop({ enum: ['User', 'Employee'], required: false })
+  assignedToModel?: string;
+
+  @Prop()
+  assignedAt?: Date;
 
   @Prop({ type: [{ type: Types.ObjectId, ref: 'Tag' }], default: [] })
   tags?: Types.ObjectId[];
@@ -32,7 +38,7 @@ export class Inventory {
   @Prop({ type: Types.ObjectId, ref: 'Department' })
   department?: Types.ObjectId;
 
-  @Prop({ enum: ['active', 'repair', 'broken'], default: 'active' })
+  @Prop({ enum: ['active', 'repair', 'broken', 'inactive'], default: 'active' })
   status: string;
 
   @Prop()

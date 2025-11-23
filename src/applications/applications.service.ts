@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Application, ApplicationDocument } from './schemas/application.schema';
@@ -173,10 +173,17 @@ export class ApplicationsService {
     applicationId: string,
     newStatus: string,
     employeeId: string,
-    employeeName: string
+    employeeName: string,
+    comment?: string
   ) {
-    const app = await this.appModel.findOne({ id: applicationId }).exec();
+    const app = await this.appModel.findById(applicationId).exec();
     if (!app) throw new NotFoundException('Application not found');
+
+    const trimmedComment = comment?.trim();
+
+    if (newStatus === 'rejected' && !trimmedComment) {
+      throw new BadRequestException('Rejection requires a comment (reason).');
+    }
 
     const employeeObjectId = new Types.ObjectId(employeeId);
     app.status = newStatus as any;
@@ -185,7 +192,7 @@ export class ApplicationsService {
       changedBy: employeeObjectId,
       changedByModel: 'Employee',
       changedAt: new Date(),
-      comment: `Status changed by ${employeeName}`,
+      comment: trimmedComment || `Status changed by ${employeeName}`,
     });
 
     await app.save();

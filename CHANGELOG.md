@@ -165,7 +165,7 @@ PATCH /api/inventory/:id - Supports status updates, auto-adds history
 - Branch and Department organization
 - Application (Ariza) submission and tracking
 - Inventory management
-- Employee and Position management
+- Employee management
 - JWT authentication
 - AWS S3 file uploads
 - Telegram notifications

@@ -14,7 +14,6 @@ import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { ApplicationsService } from './applications.service';
 import { CreateApplicationDto } from './dto/create-application.dto';
-import { UpdateStatusDto } from './dto/update-status.dto';
 import { FilesInterceptor } from '@nestjs/platform-express';
 
 @ApiTags('applications')
@@ -41,13 +40,8 @@ export class ApplicationsController {
     return this.applicationsService.findAll(filter);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() body: CreateApplicationDto) {
-    return this.applicationsService.updateApplication(id, body);
-  }
-
-  @Patch(':id/status')
-  updateStatus(@Param('id') id: string, @Body() body: UpdateStatusDto) {
-    return this.applicationsService.updateStatus(id, body.status);
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.applicationsService.findOne(id);
   }
 }

@@ -42,24 +42,46 @@ export class InventoryService {
     // Generate QR code URL
     const qrCodeUrl = await this.qrCodeService.getQrCodeUrl(dto.inventoryNumber);
     
+    let assignedTo: Types.ObjectId | undefined;
+    let assignedToModel: 'User' | 'Employee' | undefined;
+    let assignedAt: Date | undefined;
+
+    if (dto.user) {
+      assignedTo = new Types.ObjectId(dto.user);
+      assignedToModel = 'User';
+      assignedAt = new Date();
+    } else if (employeeId) {
+      assignedTo = new Types.ObjectId(employeeId);
+      assignedToModel = 'Employee';
+      assignedAt = new Date();
+    }
+
+    const history: any[] = [];
+    if (assignedTo) {
+      history.push({
+        action: 'assigned',
+        by: employeeId ? new Types.ObjectId(employeeId) : assignedTo,
+        byModel: employeeId ? 'Employee' : assignedToModel,
+        at: new Date(),
+        comment: 'Initial assignment',
+      });
+    }
+
     const created = await this.invModel.create({
       ...dto,
       images: imageUrls,
       qrCodeUrl,
-      assignedTo: dto.user,
+      assignedTo,
+      assignedToModel,
+      assignedAt,
       tags: dto.tags,
       tools: dto.tools,
-      history: [
-        {
-          action: 'assigned',
-          by: employeeId ? new Types.ObjectId(employeeId) : dto.user,
-          byModel: employeeId ? 'Employee' : 'User',
-          at: new Date(),
-          comment: 'Initial assignment',
-        },
-      ],
+      history,
     });
-    await this.logUserHistory(dto.user, created._id, 'assigned');
+
+    if (dto.user) {
+      await this.logUserHistory(dto.user, created._id, 'assigned');
+    }
     return created;
   }
 
@@ -129,7 +151,9 @@ export class InventoryService {
     if (dto.user && dto.user.toString() !== existing.assignedTo?.toString()) {
       historyEntry.action = 'assigned';
       historyEntry.comment = 'Reassigned to new user';
-      update.assignedTo = dto.user;
+      update.assignedTo = new Types.ObjectId(dto.user);
+      update.assignedToModel = 'User';
+      update.assignedAt = new Date();
     } else if (dto['status'] && dto['status'] !== existing.status) {
       historyEntry.action = dto['status']; // 'repair', 'broken', etc.
       historyEntry.comment = `Status changed to ${dto['status']}`;

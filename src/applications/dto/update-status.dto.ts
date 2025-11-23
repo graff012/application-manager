@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsNotEmpty } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class UpdateStatusDto {
   @ApiProperty({
@@ -8,4 +8,13 @@ export class UpdateStatusDto {
   @IsEnum(['new', 'assigned', 'progressing', 'completed', 'rejected'])
   @IsNotEmpty()
   status: 'new' | 'assigned' | 'progressing' | 'completed' | 'rejected';
+
+  @ApiProperty({
+    required: false,
+    description:
+      'Optional status change comment. REQUIRED when status = "rejected" (reason for rejection).',
+  })
+  @IsOptional()
+  @IsString()
+  comment?: string;
 }

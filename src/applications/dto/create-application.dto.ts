@@ -33,4 +33,14 @@ export class CreateApplicationDto {
   @IsOptional()
   @IsString()
   additionalComment?: string;
+
+  @ApiProperty({
+    required: false,
+    type: 'string',
+    format: 'binary',
+    isArray: true,
+    description: 'Images attached to the application (uploaded via multipart/form-data as "images")',
+  })
+  @IsOptional()
+  images?: any[];
 }

@@ -43,6 +43,15 @@ export class UsersService {
     return this.userModel.findOne({ tableNumber }).exec();
   }
 
+  async findByTableNumberAndPassport(
+    tableNumber: number,
+    passportNumber: string,
+  ) {
+    return this.userModel
+      .findOne({ tableNumber, passportNumber })
+      .exec();
+  }
+
   async findById(id: string) {
     const user = await this.userModel
       .findById(id)
