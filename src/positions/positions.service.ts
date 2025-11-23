@@ -18,19 +18,19 @@ export class PositionsService {
   }
 
   async findOne(id: string) {
-    const position = await this.positionModel.findOne({ id }).exec();
+    const position = await this.positionModel.findById(id).exec();
     if (!position) throw new NotFoundException('Position not found');
     return position;
   }
 
   async update(id: string, dto: UpdatePositionDto) {
-    const position = await this.positionModel.findOneAndUpdate({ id }, dto, { new: true }).exec();
+    const position = await this.positionModel.findByIdAndUpdate(id, dto, { new: true }).exec();
     if (!position) throw new NotFoundException('Position not found');
     return position;
   }
 
   async remove(id: string) {
-    const result = await this.positionModel.deleteOne({ id }).exec();
+    const result = await this.positionModel.deleteOne({ _id: id }).exec();
     if (result.deletedCount === 0) throw new NotFoundException('Position not found');
     return { deleted: true };
   }

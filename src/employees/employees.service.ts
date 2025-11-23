@@ -27,7 +27,7 @@ export class EmployeesService {
 
   async findOne(id: string) {
     const employee = await this.employeeModel
-      .findOne({ id })
+      .findById(id)
       .populate('position')
       .populate('branch')
       .populate('department')
@@ -46,7 +46,7 @@ export class EmployeesService {
       dto.password = await bcrypt.hash(dto.password, 10);
     }
     const employee = await this.employeeModel
-      .findOneAndUpdate({ id }, dto, { new: true })
+      .findByIdAndUpdate(id, dto, { new: true })
       .populate('position')
       .populate('branch')
       .populate('department')
@@ -56,15 +56,15 @@ export class EmployeesService {
   }
 
   async remove(id: string) {
-    const result = await this.employeeModel.deleteOne({ id }).exec();
+    const result = await this.employeeModel.deleteOne({ _id: id }).exec();
     if (result.deletedCount === 0) throw new NotFoundException('Employee not found');
     return { deleted: true };
   }
 
   async addAssignedApplication(employeeId: string, applicationId: any) {
     return this.employeeModel
-      .findOneAndUpdate(
-        { id: employeeId },
+      .findByIdAndUpdate(
+        employeeId,
         { $addToSet: { assignedApplications: applicationId } },
         { new: true }
       )

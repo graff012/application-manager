@@ -20,7 +20,7 @@ export class AdminsService {
   }
 
   async findOne(id: string) {
-    const admin = await this.adminModel.findOne({ id }).exec();
+    const admin = await this.adminModel.findById(id).exec();
     if (!admin) throw new NotFoundException('Admin not found');
     return admin;
   }
@@ -33,13 +33,13 @@ export class AdminsService {
     if (dto.password) {
       dto.password = await bcrypt.hash(dto.password, 10);
     }
-    const admin = await this.adminModel.findOneAndUpdate({ id }, dto, { new: true }).exec();
+    const admin = await this.adminModel.findByIdAndUpdate(id, dto, { new: true }).exec();
     if (!admin) throw new NotFoundException('Admin not found');
     return admin;
   }
 
   async remove(id: string) {
-    const result = await this.adminModel.deleteOne({ id }).exec();
+    const result = await this.adminModel.deleteOne({ _id: id }).exec();
     if (result.deletedCount === 0) throw new NotFoundException('Admin not found');
     return { deleted: true };
   }

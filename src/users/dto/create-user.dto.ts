@@ -1,5 +1,13 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsInt, IsMongoId, IsNotEmpty, IsOptional, IsString, Matches, Length } from 'class-validator';
+import {
+  IsInt,
+  IsMongoId,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  Matches,
+  Length,
+} from 'class-validator';
 
 export class CreateUserDto {
   @ApiProperty()
@@ -14,7 +22,9 @@ export class CreateUserDto {
   @ApiProperty()
   @IsString()
   @IsNotEmpty()
-  @Matches(/^[0-9]{9}$/, { message: 'Phone number must be 9 digits' })
+  @Matches(/^\+998\d{9}$/, {
+    message: 'Phone number must be valid Uzbekistan number. E.g. +998992224455',
+  })
   phone: string;
 
   @ApiProperty()

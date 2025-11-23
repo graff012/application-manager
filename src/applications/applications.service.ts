@@ -74,7 +74,7 @@ export class ApplicationsService {
 
   async findOne(id: string) {
     const app = await this.appModel
-      .findOne({ id })
+      .findById(id)
       .populate('user')
       .populate('branch')
       .populate('department')
@@ -138,7 +138,7 @@ export class ApplicationsService {
     employeeId: string,
     employeeName: string
   ) {
-    const app = await this.appModel.findOne({ id: applicationId }).exec();
+    const app = await this.appModel.findById(applicationId).exec();
     if (!app) throw new NotFoundException('Application not found');
 
     const employeeObjectId = new Types.ObjectId(employeeId);
@@ -156,7 +156,7 @@ export class ApplicationsService {
 
     // WebSocket notification
     this.employeeGateway.broadcastAppAssigned({
-      applicationId: app.id,
+      applicationId: app._id.toString(),
       employeeId,
       employeeName,
     });
@@ -192,10 +192,11 @@ export class ApplicationsService {
 
     // WebSocket notification
     this.employeeGateway.broadcastStatusChanged({
-      applicationId: app.id,
+      applicationId: app._id.toString(),
       newStatus,
       changedBy: employeeName,
       timestamp: new Date(),
+      employeeId,
     });
 
     // Telegram notification

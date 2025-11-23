@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User, UserDocument } from './schemas/user.schema';
@@ -14,17 +18,25 @@ export class UsersService {
       throw new BadRequestException('Table number is required');
     }
 
-    const user = await this.userModel.findOne({ tableNumber: dto.tableNumber }).exec();
+    const user = await this.userModel
+      .findOne({ tableNumber: dto.tableNumber })
+      .exec();
 
     if (user) {
-      throw new BadRequestException('User with this table number already exists');
+      throw new BadRequestException(
+        'User with this table number already exists',
+      );
     }
 
     return await this.userModel.create(dto);
   }
 
   async findAll() {
-    return this.userModel.find().populate('branch').populate('department').exec();
+    return this.userModel
+      .find()
+      .populate('branch')
+      .populate('department')
+      .exec();
   }
 
   async findByTableNumber(tableNumber: number) {
@@ -33,7 +45,7 @@ export class UsersService {
 
   async findById(id: string) {
     const user = await this.userModel
-      .findOne({ id })
+      .findById(id)
       .populate('branch')
       .populate('department')
       .exec();
@@ -42,7 +54,7 @@ export class UsersService {
   }
 
   async updateProfile(userId: string, dto: UpdateProfileDto) {
-    const user = await this.userModel.findOne({ id: userId }).exec();
+    const user = await this.userModel.findById(userId).exec();
     if (!user) throw new NotFoundException('User not found');
 
     if (dto.phone) user.phone = dto.phone;
@@ -58,8 +70,9 @@ export class UsersService {
   }
 
   async remove(id: string) {
-    const result = await this.userModel.deleteOne({ id }).exec();
-    if (result.deletedCount === 0) throw new NotFoundException('User not found');
+    const result = await this.userModel.deleteOne({ _id: id }).exec();
+    if (result.deletedCount === 0)
+      throw new NotFoundException('User not found');
     return { deleted: true };
   }
 }

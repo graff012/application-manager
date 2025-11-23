@@ -153,7 +153,7 @@ src/
 **Schema Fields:**
 ```typescript
 {
-  id: string,              // UUID
+  _id: ObjectId,           // MongoDB primary key
   tableNumber: number,     // Unique identifier (used for login)
   fullName: string,
   phone: string,           // Required phone number (9 digits)
@@ -189,7 +189,7 @@ src/
 **Schema Fields:**
 ```typescript
 {
-  id: string,
+  _id: ObjectId,
   index: string,           // Auto-generated: "00001-2025"
   status: string,          // 'new' | 'assigned' | 'progressing' | 'completed' | 'rejected'
   user: ObjectId,          // Who created it
@@ -241,7 +241,7 @@ src/
 **Schema Fields:**
 ```typescript
 {
-  id: string,
+  _id: ObjectId,
   name: string,            // Asset name (e.g., "Canon MF3010")
   inventoryNumber: string, // Unique ID (e.g., "2000102")
   serial?: string,         // Serial number (optional)
@@ -293,7 +293,7 @@ src/
 **Schema Fields:**
 ```typescript
 {
-  id: string,
+  _id: ObjectId,
   name: string,        // Tool name (e.g., "Screwdriver set")
   toolNumber: string,  // Unique tool number (e.g., "TL-0001")
   serial?: string,     // Optional serial/serie number
@@ -321,7 +321,7 @@ src/
 **Schema Fields:**
 ```typescript
 {
-  id: string,
+  _id: ObjectId,
   fullName: string,
   email: string,           // Unique, used for login
   password: string,        // Hashed with bcrypt

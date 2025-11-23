@@ -1,6 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Types } from 'mongoose';
-import { v4 as uuid } from 'uuid';
 
 export type EmployeeDocument = HydratedDocument<Employee>;
 
@@ -8,9 +7,6 @@ export type EmployeeStatus = 'active' | 'inactive';
 
 @Schema({ timestamps: true })
 export class Employee {
-  @Prop({ default: () => uuid() })
-  id: string;
-
   @Prop({ required: true })
   fullName: string;
 

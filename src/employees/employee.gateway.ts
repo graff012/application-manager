@@ -19,7 +19,14 @@ export class EmployeeGateway implements OnGatewayConnection, OnGatewayDisconnect
   private logger = new Logger('EmployeeGateway');
 
   handleConnection(client: Socket) {
-    this.logger.log(`Client connected: ${client.id}`);
+    const employeeId = client.handshake.query.employeeId;
+
+    if (typeof employeeId === 'string' && employeeId) {
+      client.join(employeeId);
+      this.logger.log(`Client connected: ${client.id} joined room for employee ${employeeId}`);
+    } else {
+      this.logger.warn(`Client connected without employeeId: ${client.id}`);
+    }
   }
 
   handleDisconnect(client: Socket) {
@@ -27,7 +34,7 @@ export class EmployeeGateway implements OnGatewayConnection, OnGatewayDisconnect
   }
 
   broadcastAppAssigned(data: { applicationId: string; employeeId: string; employeeName: string }) {
-    this.server.emit('appAssigned', data);
+    this.server.to(data.employeeId).emit('appAssigned', data);
   }
 
   broadcastStatusChanged(data: {
@@ -35,7 +42,8 @@ export class EmployeeGateway implements OnGatewayConnection, OnGatewayDisconnect
     newStatus: string;
     changedBy: string;
     timestamp: Date;
+    employeeId: string;
   }) {
-    this.server.emit('statusChanged', data);
+    this.server.to(data.employeeId).emit('statusChanged', data);
   }
 }

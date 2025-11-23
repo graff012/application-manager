@@ -1,14 +1,10 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Types } from 'mongoose';
-import { v4 as uuid } from 'uuid';
 
 export type UserDocument = HydratedDocument<User>;
 
 @Schema({ timestamps: true })
 export class User {
-  @Prop({ default: () => uuid() })
-  id: string;
-
   @Prop({ unique: true, required: true })
   tableNumber: number;
 
