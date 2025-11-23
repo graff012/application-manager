@@ -27,6 +27,9 @@ export class Inventory {
   @Prop({ type: [{ type: Types.ObjectId, ref: 'Tag' }], default: [] })
   tags?: Types.ObjectId[];
 
+  @Prop({ type: [{ type: Types.ObjectId, ref: 'Tool' }], default: [] })
+  tools?: Types.ObjectId[];
+
   @Prop({ type: Types.ObjectId, ref: 'Branch' })
   branch?: Types.ObjectId;
 

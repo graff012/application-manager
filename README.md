@@ -248,6 +248,8 @@ src/
   images: string[],        // Local image file paths
   qrCodeUrl?: string,      // Path to generated QR code image
   assignedTo?: ObjectId,   // Current user
+  tags?: ObjectId[],       // Optional special tags linked from Tags module
+  tools?: ObjectId[],      // Optional tools linked from Tools module
   branch?: ObjectId,
   department?: ObjectId,
   status: string,          // 'active' | 'repair' | 'broken'
@@ -269,6 +271,7 @@ src/
 - ✅ Generates QR code on inventory creation
 - ✅ QR codes link to inventory details page
 - ✅ Downloadable QR code images for printing
+ - ✅ Supports optional special tags and tools references
 
 ---
 

@@ -36,4 +36,10 @@ export class CreateInventoryDto {
   @IsArray()
   @IsMongoId({ each: true })
   tags?: string[];
+
+  @ApiProperty({ required: false, type: [String] })
+  @IsOptional()
+  @IsArray()
+  @IsMongoId({ each: true })
+  tools?: string[];
 }

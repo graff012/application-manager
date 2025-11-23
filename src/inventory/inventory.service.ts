@@ -48,6 +48,7 @@ export class InventoryService {
       qrCodeUrl,
       assignedTo: dto.user,
       tags: dto.tags,
+      tools: dto.tools,
       history: [
         {
           action: 'assigned',
