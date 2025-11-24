@@ -3,6 +3,8 @@
 
 ### Node ###
 # Logs
+uploads/
+public/
 logs
 *.log
 npm-debug.log*
