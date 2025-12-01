@@ -24,6 +24,11 @@ async function bootstrap() {
 
   app.setGlobalPrefix('api');
 
+  app.enableCors({
+    origin: process.env.FRONTEND_ORIGIN || '*',
+    credentials: false,
+  });
+
   const config = new DocumentBuilder()
     .setTitle('Ariza Manager API')
     .setDescription('MVP for request management')
