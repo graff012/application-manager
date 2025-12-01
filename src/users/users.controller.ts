@@ -34,6 +34,11 @@ export class UsersController {
     return this.usersService.findAll();
   }
 
+  @Get('me')
+  getMe(@Request() req) {
+    return this.usersService.findById(req.user.userId);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.usersService.findById(id);

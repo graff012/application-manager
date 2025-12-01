@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Request } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { AdminsService } from './admins.service';
 import { CreateAdminDto } from './dto/create-admin.dto';
@@ -24,6 +24,12 @@ export class AdminsController {
   @Roles('admin')
   findAll() {
     return this.adminsService.findAll();
+  }
+
+  @Get('me')
+  @Roles('admin')
+  getMe(@Request() req) {
+    return this.adminsService.findOne(req.user.userId);
   }
 
   @Get(':id')
