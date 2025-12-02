@@ -16,6 +16,13 @@ export class DepartmentsService {
     return this.deptModel.find().populate('branch').exec();
   }
 
+  findByBranch(branchId: string) {
+    if (!branchId) {
+      throw new BadRequestException('Branch id is required');
+    }
+    return this.deptModel.find({ branch: branchId }).populate('branch').exec();
+  }
+
   findOne(id: string) {
     if (!id) {
       throw new BadRequestException('Department id is required');

@@ -23,6 +23,11 @@ export class DepartmentsController {
     return this.departmentsService.findAll();
   }
 
+  @Get('branch/:branchId')
+  findByBranch(@Param('branchId') branchId: string) {
+    return this.departmentsService.findByBranch(branchId);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.departmentsService.findOne(id);
