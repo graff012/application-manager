@@ -24,6 +24,15 @@ export class EmployeesService {
       .exec();
   }
 
+  findByBranch(branchId: string) {
+    return this.employeeModel
+      .find({ branch: branchId })
+      .populate('branch')
+      .populate('department')
+      .populate('assignedApplications')
+      .exec();
+  }
+
   async findOne(id: string) {
     const employee = await this.employeeModel
       .findById(id)
