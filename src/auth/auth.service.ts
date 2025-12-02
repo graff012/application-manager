@@ -14,10 +14,10 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async login(tableNumber: number, passportNumber: string) {
+  async login(tableNumber: number, jshshir: string) {
     const user = await this.usersService.findByTableNumberAndPassport(
       tableNumber,
-      passportNumber,
+      jshshir,
     );
     if (!user)
       throw new UnauthorizedException(

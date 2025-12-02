@@ -14,5 +14,5 @@ export class LoginDto {
   @IsString()
   @IsNotEmpty()
   @Length(14, 14)
-  passportNumber: string;
+  jshshir: string;
 }

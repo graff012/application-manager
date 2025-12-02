@@ -29,7 +29,7 @@ export class Employee {
   phone: string;
 
   @Prop({ required: true, unique: true })
-  passportNumber: string;
+  jshshir: string;
 
   @Prop({ type: [{ type: Types.ObjectId, ref: 'Application' }], default: [] })
   assignedApplications: Types.ObjectId[];

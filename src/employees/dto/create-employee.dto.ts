@@ -53,5 +53,5 @@ export class CreateEmployeeDto {
   @IsString()
   @IsNotEmpty()
   @Length(14, 14, { message: 'Passport number must be 14 characters' })
-  passportNumber: string;
+  jshshir: string;
 }

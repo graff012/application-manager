@@ -11,7 +11,7 @@ export class AuthController {
 
   @Post('login')
   login(@Body() dto: LoginDto) {
-    return this.authService.login(dto.tableNumber, dto.passportNumber);
+    return this.authService.login(dto.tableNumber, dto.jshshir);
   }
 
   @Post('admin/login')

@@ -21,7 +21,7 @@ export class User {
   phone: string;
 
   @Prop({ required: true, unique: true })
-  passportNumber: string;
+  jshshir: string;
 
   @Prop({ required: false, enum: ['male', 'female', 'other'] })
   gender?: string;

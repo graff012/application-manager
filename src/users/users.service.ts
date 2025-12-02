@@ -45,10 +45,10 @@ export class UsersService {
 
   async findByTableNumberAndPassport(
     tableNumber: number,
-    passportNumber: string,
+    jshshir: string,
   ) {
     return this.userModel
-      .findOne({ tableNumber, passportNumber })
+      .findOne({ tableNumber, jshshir })
       .exec();
   }
 
