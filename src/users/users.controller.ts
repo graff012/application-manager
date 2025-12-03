@@ -34,6 +34,11 @@ export class UsersController {
     return this.usersService.findAll();
   }
 
+  @Get('branch/:branchId')
+  findByBranch(@Param('branchId') branchId: string) {
+    return this.usersService.findByBranch(branchId);
+  }
+
   @Get('me')
   getMe(@Request() req) {
     return this.usersService.findById(req.user.userId);

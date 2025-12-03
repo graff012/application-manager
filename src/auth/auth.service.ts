@@ -24,6 +24,10 @@ export class AuthService {
         'Table number or passport number is incorrect',
       );
 
+    if (user.status === 'blocked') {
+      throw new UnauthorizedException('User is blocked');
+    }
+
     const payload = { sub: user._id.toString(), tableNumber: user.tableNumber };
     return { access_token: await this.jwtService.signAsync(payload) };
   }

@@ -1,6 +1,6 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, isValidObjectId } from 'mongoose';
 import * as bcrypt from 'bcrypt';
 import { Employee, EmployeeDocument } from './schemas/employee.schema';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
@@ -15,33 +15,58 @@ export class EmployeesService {
     return this.employeeModel.create({ ...dto, password: hashedPassword });
   }
 
-  findAll() {
-    return this.employeeModel
-      .find()
-      .populate('branch')
-      .populate('department')
-      .populate('assignedApplications')
-      .exec();
+  async findAll() {
+    try {
+      return await this.employeeModel
+        .find()
+        .populate('branch')
+        .populate('department')
+        .populate('assignedApplications')
+        .exec();
+    } catch (error) {
+      throw new InternalServerErrorException('Failed to fetch employees');
+    }
   }
 
-  findByBranch(branchId: string) {
-    return this.employeeModel
-      .find({ branch: branchId })
-      .populate('branch')
-      .populate('department')
-      .populate('assignedApplications')
-      .exec();
+  async findByBranch(branchId: string) {
+    if (!branchId) {
+      throw new BadRequestException('Branch ID is required');
+    }
+    if (!isValidObjectId(branchId)) {
+      throw new BadRequestException('Invalid branch ID format');
+    }
+    try {
+      return await this.employeeModel
+        .find({ branch: branchId })
+        .populate('branch')
+        .populate('department')
+        .populate('assignedApplications')
+        .exec();
+    } catch (error) {
+      throw new InternalServerErrorException('Failed to fetch employees by branch');
+    }
   }
 
   async findOne(id: string) {
-    const employee = await this.employeeModel
-      .findById(id)
-      .populate('branch')
-      .populate('department')
-      .populate('assignedApplications')
-      .exec();
-    if (!employee) throw new NotFoundException('Employee not found');
-    return employee;
+    if (!id) {
+      throw new BadRequestException('Employee ID is required');
+    }
+    if (!isValidObjectId(id)) {
+      throw new BadRequestException('Invalid employee ID format');
+    }
+    try {
+      const employee = await this.employeeModel
+        .findById(id)
+        .populate('branch')
+        .populate('department')
+        .populate('assignedApplications')
+        .exec();
+      if (!employee) throw new NotFoundException('Employee not found');
+      return employee;
+    } catch (error) {
+      if (error instanceof NotFoundException) throw error;
+      throw new InternalServerErrorException('Failed to fetch employee');
+    }
   }
 
   async findByEmail(email: string) {
@@ -49,22 +74,44 @@ export class EmployeesService {
   }
 
   async update(id: string, dto: UpdateEmployeeDto) {
+    if (!id) {
+      throw new BadRequestException('Employee ID is required');
+    }
+    if (!isValidObjectId(id)) {
+      throw new BadRequestException('Invalid employee ID format');
+    }
     if (dto.password) {
       dto.password = await bcrypt.hash(dto.password, 10);
     }
-    const employee = await this.employeeModel
-      .findByIdAndUpdate(id, dto, { new: true })
-      .populate('branch')
-      .populate('department')
-      .exec();
-    if (!employee) throw new NotFoundException('Employee not found');
-    return employee;
+    try {
+      const employee = await this.employeeModel
+        .findByIdAndUpdate(id, dto, { new: true })
+        .populate('branch')
+        .populate('department')
+        .exec();
+      if (!employee) throw new NotFoundException('Employee not found');
+      return employee;
+    } catch (error) {
+      if (error instanceof NotFoundException) throw error;
+      throw new InternalServerErrorException('Failed to update employee');
+    }
   }
 
   async remove(id: string) {
-    const result = await this.employeeModel.deleteOne({ _id: id }).exec();
-    if (result.deletedCount === 0) throw new NotFoundException('Employee not found');
-    return { deleted: true };
+    if (!id) {
+      throw new BadRequestException('Employee ID is required');
+    }
+    if (!isValidObjectId(id)) {
+      throw new BadRequestException('Invalid employee ID format');
+    }
+    try {
+      const result = await this.employeeModel.deleteOne({ _id: id }).exec();
+      if (result.deletedCount === 0) throw new NotFoundException('Employee not found');
+      return { deleted: true };
+    } catch (error) {
+      if (error instanceof NotFoundException) throw error;
+      throw new InternalServerErrorException('Failed to delete employee');
+    }
   }
 
   async addAssignedApplication(employeeId: string, applicationId: any) {

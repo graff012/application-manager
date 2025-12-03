@@ -2,9 +2,10 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, isValidObjectId } from 'mongoose';
 import { User, UserDocument } from './schemas/user.schema';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
@@ -32,11 +33,35 @@ export class UsersService {
   }
 
   async findAll() {
-    return this.userModel
-      .find()
-      .populate('branch')
-      .populate('department')
-      .exec();
+    try {
+      const users = await this.userModel
+        .find()
+        .populate('branch')
+        .populate('department')
+        .exec();
+      return users;
+    } catch (error) {
+      throw new InternalServerErrorException('Failed to fetch users');
+    }
+  }
+
+  async findByBranch(branchId: string) {
+    if (!branchId) {
+      throw new BadRequestException('Branch ID is required');
+    }
+    if (!isValidObjectId(branchId)) {
+      throw new BadRequestException('Invalid branch ID format');
+    }
+    try {
+      const users = await this.userModel
+        .find({ branch: branchId })
+        .populate('branch')
+        .populate('department')
+        .exec();
+      return users;
+    } catch (error) {
+      throw new InternalServerErrorException('Failed to fetch users by branch');
+    }
   }
 
   async findByTableNumber(tableNumber: number) {
@@ -53,13 +78,24 @@ export class UsersService {
   }
 
   async findById(id: string) {
-    const user = await this.userModel
-      .findById(id)
-      .populate('branch')
-      .populate('department')
-      .exec();
-    if (!user) throw new NotFoundException('User not found');
-    return user;
+    if (!id) {
+      throw new BadRequestException('User ID is required');
+    }
+    if (!isValidObjectId(id)) {
+      throw new BadRequestException('Invalid user ID format');
+    }
+    try {
+      const user = await this.userModel
+        .findById(id)
+        .populate('branch')
+        .populate('department')
+        .exec();
+      if (!user) throw new NotFoundException('User not found');
+      return user;
+    } catch (error) {
+      if (error instanceof NotFoundException) throw error;
+      throw new InternalServerErrorException('Failed to fetch user');
+    }
   }
 
   async updateProfile(userId: string, dto: UpdateProfileDto) {

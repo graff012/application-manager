@@ -5,6 +5,7 @@ import {
   IsNotEmpty,
   IsOptional,
   IsString,
+  IsEnum,
   Matches,
   Length,
 } from 'class-validator';
@@ -32,6 +33,16 @@ export class CreateUserDto {
   @IsNotEmpty()
   @Length(14, 14, { message: 'Passport number must be 14 characters' })
   jshshir: string;
+
+  @ApiPropertyOptional({ enum: ['active', 'blocked'], default: 'active' })
+  @IsOptional()
+  @IsEnum(['active', 'blocked'])
+  status?: 'active' | 'blocked';
+
+  @ApiPropertyOptional({ description: 'Avatar image path under public/avatar' })
+  @IsOptional()
+  @IsString()
+  avatar?: string;
 
   @ApiProperty({ required: false })
   @IsOptional()

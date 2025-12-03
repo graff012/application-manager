@@ -54,4 +54,9 @@ export class CreateEmployeeDto {
   @IsNotEmpty()
   @Length(14, 14, { message: 'Passport number must be 14 characters' })
   jshshir: string;
+
+  @ApiPropertyOptional({ description: 'Avatar image path under public/avatar' })
+  @IsOptional()
+  @IsString()
+  avatar?: string;
 }

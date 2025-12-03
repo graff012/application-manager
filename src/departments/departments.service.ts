@@ -1,6 +1,6 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { Injectable, BadRequestException, NotFoundException, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, isValidObjectId } from 'mongoose';
 import { Department, DepartmentDocument } from './schemas/department.schema';
 import { CreateDepartmentDto } from './dto/create-department.dto';
 
@@ -8,39 +8,84 @@ import { CreateDepartmentDto } from './dto/create-department.dto';
 export class DepartmentsService {
   constructor(@InjectModel(Department.name) private deptModel: Model<DepartmentDocument>) {}
 
-  create(dto: CreateDepartmentDto) {
-    return this.deptModel.create(dto);
+  async create(dto: CreateDepartmentDto) {
+    try {
+      return await this.deptModel.create(dto);
+    } catch (error) {
+      throw new InternalServerErrorException('Failed to create department');
+    }
   }
 
-  findAll() {
-    return this.deptModel.find().populate('branch').exec();
+  async findAll() {
+    try {
+      return await this.deptModel.find().populate('branch').exec();
+    } catch (error) {
+      throw new InternalServerErrorException('Failed to fetch departments');
+    }
   }
 
-  findByBranch(branchId: string) {
+  async findByBranch(branchId: string) {
     if (!branchId) {
       throw new BadRequestException('Branch id is required');
     }
-    return this.deptModel.find({ branch: branchId }).populate('branch').exec();
+    if (!isValidObjectId(branchId)) {
+      throw new BadRequestException('Invalid branch id format');
+    }
+    try {
+      return await this.deptModel.find({ branch: branchId }).populate('branch').exec();
+    } catch (error) {
+      throw new InternalServerErrorException('Failed to fetch departments by branch');
+    }
   }
 
-  findOne(id: string) {
+  async findOne(id: string) {
     if (!id) {
       throw new BadRequestException('Department id is required');
     }
-    return this.deptModel.findById(id).populate('branch').exec();
+    if (!isValidObjectId(id)) {
+      throw new BadRequestException('Invalid department id format');
+    }
+    try {
+      const department = await this.deptModel.findById(id).populate('branch').exec();
+      if (!department) throw new NotFoundException('Department not found');
+      return department;
+    } catch (error) {
+      if (error instanceof NotFoundException) throw error;
+      throw new InternalServerErrorException('Failed to fetch department');
+    }
   }
 
-  update(id: string, dto: CreateDepartmentDto) {
+  async update(id: string, dto: CreateDepartmentDto) {
     if (!id) {
       throw new BadRequestException('Department id is required');
     }
-    return this.deptModel.findByIdAndUpdate(id, dto, { new: true }).populate('branch').exec();
+    if (!isValidObjectId(id)) {
+      throw new BadRequestException('Invalid department id format');
+    }
+    try {
+      const department = await this.deptModel.findByIdAndUpdate(id, dto, { new: true }).populate('branch').exec();
+      if (!department) throw new NotFoundException('Department not found');
+      return department;
+    } catch (error) {
+      if (error instanceof NotFoundException) throw error;
+      throw new InternalServerErrorException('Failed to update department');
+    }
   }
 
-  delete(id: string) {
+  async delete(id: string) {
     if (!id) {
       throw new BadRequestException('Department id is required');
     }
-    return this.deptModel.findByIdAndDelete(id).exec();
+    if (!isValidObjectId(id)) {
+      throw new BadRequestException('Invalid department id format');
+    }
+    try {
+      const department = await this.deptModel.findByIdAndDelete(id).exec();
+      if (!department) throw new NotFoundException('Department not found');
+      return department;
+    } catch (error) {
+      if (error instanceof NotFoundException) throw error;
+      throw new InternalServerErrorException('Failed to delete department');
+    }
   }
 }

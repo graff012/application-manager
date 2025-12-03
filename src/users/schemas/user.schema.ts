@@ -23,6 +23,12 @@ export class User {
   @Prop({ required: true, unique: true })
   jshshir: string;
 
+  @Prop({ enum: ['active', 'blocked'], default: 'active' })
+  status: 'active' | 'blocked';
+
+  @Prop({ required: false })
+  avatar?: string; // Path under public/avatar
+
   @Prop({ required: false, enum: ['male', 'female', 'other'] })
   gender?: string;
 

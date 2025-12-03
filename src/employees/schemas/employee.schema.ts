@@ -31,6 +31,9 @@ export class Employee {
   @Prop({ required: true, unique: true })
   jshshir: string;
 
+  @Prop({ required: false })
+  avatar?: string; // Path under public/avatar
+
   @Prop({ type: [{ type: Types.ObjectId, ref: 'Application' }], default: [] })
   assignedApplications: Types.ObjectId[];
 

@@ -16,6 +16,9 @@ export class Admin {
 
   @Prop({ default: 'admin' })
   role: string;
+
+  @Prop({ required: false })
+  avatar?: string; // Path under public/avatar
 }
 
 export const AdminSchema = SchemaFactory.createForClass(Admin);

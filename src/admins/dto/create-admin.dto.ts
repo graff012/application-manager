@@ -1,5 +1,5 @@
-import { IsString, IsEmail, IsNotEmpty } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+import { IsString, IsEmail, IsNotEmpty, IsOptional } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateAdminDto {
   @ApiProperty()
@@ -16,4 +16,9 @@ export class CreateAdminDto {
   @IsString()
   @IsNotEmpty()
   password: string;
+
+  @ApiPropertyOptional({ description: 'Avatar image path under public/avatar' })
+  @IsOptional()
+  @IsString()
+  avatar?: string;
 }
