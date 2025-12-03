@@ -20,6 +20,8 @@ export class UsersService {
       throw new BadRequestException('Table number is required');
     }
 
+    console.log('starting to add users')
+
     const existingByTableNumber = await this.userModel
       .findOne({ tableNumber: dto.tableNumber })
       .exec();
@@ -37,6 +39,8 @@ export class UsersService {
         'User with this table number already exists',
       );
     }
+
+    console.log('user added')
 
     return await this.userModel.create(dto);
     } catch (err) {
