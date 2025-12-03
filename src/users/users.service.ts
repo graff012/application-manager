@@ -19,17 +19,19 @@ export class UsersService {
       throw new BadRequestException('Table number is required');
     }
 
-    const user = await this.userModel
+    const existingByTableNumber = await this.userModel
       .findOne({ tableNumber: dto.tableNumber })
       .exec();
 
-    const passport = await this.userModel
-       .findOne({jshshir: dto.jshshir})
-       .exec();
+    const existingByJshshir = await this.userModel
+      .findOne({ jshshir: dto.jshshir })
+      .exec();
 
-    if (passport) throw new BadRequestException('User with this jshshir already exist')
+    if (existingByJshshir) {
+      throw new BadRequestException('User with this jshshir already exists');
+    }
 
-    if (user) {
+    if (existingByTableNumber) {
       throw new BadRequestException(
         'User with this table number already exists',
       );
