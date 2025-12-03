@@ -20,14 +20,18 @@ export class User {
   @Prop({ required: true, unique: true })
   phone: string;
 
-  @Prop({ required: true })
+  @Prop({
+    required: true,
+    unique: true,
+    sparse: true, // Add sparse to allow multiple null values during creation
+  })
   jshshir: string;
 
   @Prop({ enum: ['active', 'blocked'], default: 'active' })
   status: 'active' | 'blocked';
 
   @Prop({ required: false })
-  avatar?: string; // Path under public/avatar
+  avatar?: string;
 
   @Prop({ required: false, enum: ['male', 'female', 'other'] })
   gender?: string;
@@ -53,20 +57,9 @@ export class User {
     action: string;
     timestamp: Date;
   }>;
-
-  public static postSchemaCreation(schema: any) {
-    // Defines the unique index AFTER the schema is created,
-    // applying the partial filter to ignore existing 'null' duplicates.
-    schema.index(
-      { jshshir: 1 },
-      {
-        unique: true,
-        partialFilterExpression: { jshshir: { $exists: true, $ne: null } },
-      },
-    );
-  }
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
 
-User.postSchemaCreation(UserSchema);
+// Remove the postSchemaCreation method entirely - it's not needed
+// The @Prop decorators handle index creation
