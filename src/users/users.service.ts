@@ -23,6 +23,12 @@ export class UsersService {
       .findOne({ tableNumber: dto.tableNumber })
       .exec();
 
+    const passport = await this.userModel
+       .findOne({jshshir: dto.jshshir})
+       .exec();
+
+    if (passport) throw new BadRequestException('User with this jshshir already exist')
+
     if (user) {
       throw new BadRequestException(
         'User with this table number already exists',
