@@ -20,11 +20,7 @@ export class User {
   @Prop({ required: true, unique: true })
   phone: string;
 
-  @Prop({
-    required: true,
-    unique: true,
-    sparse: true, // Add sparse to allow multiple null values during creation
-  })
+  @Prop({ required: true, unique: true })
   jshshir: string;
 
   @Prop({ enum: ['active', 'blocked'], default: 'active' })
@@ -60,6 +56,4 @@ export class User {
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
-
-// Remove the postSchemaCreation method entirely - it's not needed
-// The @Prop decorators handle index creation
+// Remove the postSchemaCreation - it's causing issues
