@@ -15,6 +15,7 @@ export class UsersService {
   constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
 
   async create(dto: CreateUserDto) {
+    try {
     if (!dto.tableNumber) {
       throw new BadRequestException('Table number is required');
     }
@@ -38,6 +39,9 @@ export class UsersService {
     }
 
     return await this.userModel.create(dto);
+    } catch (err) {
+      console.error('Error occured: ', err)
+    }
   }
 
   async findAll() {
