@@ -31,15 +31,15 @@ export class CreateEmployeeDto {
   @IsOptional()
   status?: 'active' | 'inactive';
 
-  @ApiPropertyOptional()
+  @ApiProperty()
   @IsMongoId()
-  @IsOptional()
-  branch?: string;
+  @IsNotEmpty()
+  branch: string;
 
-  @ApiPropertyOptional()
+  @ApiProperty()
   @IsMongoId()
-  @IsOptional()
-  department?: string;
+  @IsNotEmpty()
+  department: string;
 
   @ApiProperty()
   @IsString()

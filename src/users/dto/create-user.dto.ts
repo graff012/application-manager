@@ -44,13 +44,13 @@ export class CreateUserDto {
   @IsString()
   avatar?: string;
 
-  @ApiProperty({ required: false })
-  @IsOptional()
+  @ApiProperty()
   @IsMongoId()
-  branch?: string;
+  @IsNotEmpty()
+  branch: string;
 
-  @ApiProperty({ required: false })
-  @IsOptional()
+  @ApiProperty()
   @IsMongoId()
-  department?: string;
+  @IsNotEmpty()
+  department: string;
 }

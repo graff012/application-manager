@@ -19,10 +19,10 @@ export class Employee {
   @Prop({ required: true, enum: ['active', 'inactive'], default: 'active' })
   status: EmployeeStatus;
 
-  @Prop({ type: Types.ObjectId, ref: 'Branch' })
+  @Prop({ type: Types.ObjectId, ref: 'Branch', required: true })
   branch: Types.ObjectId;
 
-  @Prop({ type: Types.ObjectId, ref: 'Department' })
+  @Prop({ type: Types.ObjectId, ref: 'Department', required: true })
   department: Types.ObjectId;
 
   @Prop({ required: true })
