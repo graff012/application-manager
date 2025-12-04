@@ -16,35 +16,35 @@ export class UsersService {
 
   async create(dto: CreateUserDto) {
     try {
-    if (!dto.tableNumber) {
-      throw new BadRequestException('Table number is required');
-    }
+      if (!dto.tableNumber) {
+        throw new BadRequestException('Table number is required');
+      }
 
-    console.log('starting to add users')
+      console.log('starting to add users');
 
-    const existingByTableNumber = await this.userModel
-      .findOne({ tableNumber: dto.tableNumber })
-      .exec();
+      const existingByTableNumber = await this.userModel
+        .findOne({ tableNumber: dto.tableNumber })
+        .exec();
 
-    const existingByJshshir = await this.userModel
-      .findOne({ jshshir: dto.jshshir })
-      .exec();
+      const existingByJshshir = await this.userModel
+        .findOne({ jshshir: dto.jshshir })
+        .exec();
 
-    if (existingByJshshir) {
-      throw new BadRequestException('User with this jshshir already exists');
-    }
+      if (existingByJshshir) {
+        throw new BadRequestException('User with this jshshir already exists');
+      }
 
-    if (existingByTableNumber) {
-      throw new BadRequestException(
-        'User with this table number already exists',
-      );
-    }
+      if (existingByTableNumber) {
+        throw new BadRequestException(
+          'User with this table number already exists',
+        );
+      }
 
-    console.log('user added')
+      console.log('user added');
 
-    return await this.userModel.create(dto);
+      return await this.userModel.create(dto);
     } catch (err) {
-      console.error('Error occured: ', err)
+      console.error('Error occured: ', err);
     }
   }
 
@@ -80,17 +80,12 @@ export class UsersService {
     }
   }
 
-  async findByTableNumber(tableNumber: number) {
+  async findByTableNumber(tableNumber: string) {
     return this.userModel.findOne({ tableNumber }).exec();
   }
 
-  async findByTableNumberAndPassport(
-    tableNumber: number,
-    jshshir: string,
-  ) {
-    return this.userModel
-      .findOne({ tableNumber, jshshir })
-      .exec();
+  async findByTableNumberAndPassport(tableNumber: string, jshshir: string) {
+    return this.userModel.findOne({ tableNumber, jshshir }).exec();
   }
 
   async findById(id: string) {
@@ -115,19 +110,23 @@ export class UsersService {
   }
 
   async updateProfile(userId: string, dto: UpdateProfileDto) {
-    const user = await this.userModel.findById(userId).exec();
-    if (!user) throw new NotFoundException('User not found');
+    try {
+      const user = await this.userModel.findById(userId).exec();
+      if (!user) throw new NotFoundException('User not found');
 
-    if (dto.phone) user.phone = dto.phone;
-    if (dto.gender) user.gender = dto.gender;
+      if (dto.phone) user.phone = dto.phone;
+      if (dto.gender) user.gender = dto.gender;
 
-    // Mark profile as complete if both phone and gender are provided
-    if (user.phone && user.gender) {
-      user.profileComplete = true;
+      // Mark profile as complete if both phone and gender are provided
+      if (user.phone && user.gender) {
+        user.profileComplete = true;
+      }
+
+      await user.save();
+      return user;
+    } catch (err) {
+      console.error('error occured:', err);
     }
-
-    await user.save();
-    return user;
   }
 
   async remove(id: string) {

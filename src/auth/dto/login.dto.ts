@@ -1,11 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsInt, IsNotEmpty, IsString, Length } from 'class-validator';
+import { IsNotEmpty, IsString, Length } from 'class-validator';
 
 export class LoginDto {
   @ApiProperty()
-  @IsInt()
   @IsNotEmpty()
-  tableNumber: number;
+  @IsString()
+  tableNumber: string;
 
   @ApiProperty({
     example: '12345678910121',

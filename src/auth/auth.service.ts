@@ -14,7 +14,7 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async login(tableNumber: number, jshshir: string) {
+  async login(tableNumber: string, jshshir: string) {
     const user = await this.usersService.findByTableNumberAndPassport(
       tableNumber,
       jshshir,
