@@ -9,7 +9,7 @@ import {
   Request,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -49,7 +49,7 @@ export class UsersController {
     return this.usersService.findById(id);
   }
 
-  @Get(':tableNumber')
+  @Get('tabel/:tableNumber')
   findByTableNumber(@Param('tableNumber') tableNumber: number) {
     return this.usersService.findByTableNumber(tableNumber);
   }
@@ -66,7 +66,7 @@ export class UsersController {
     return this.usersService.remove(id);
   }
 
-  @Patch('profile')
+  @Patch('me')
   updateProfile(@Request() req, @Body() dto: UpdateProfileDto) {
     // This endpoint remains for user self-profile updates (not admin only)
     return this.usersService.updateProfile(req.user.userId, dto);
