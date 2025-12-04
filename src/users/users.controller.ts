@@ -50,7 +50,7 @@ export class UsersController {
   }
 
   @Get('tabel/:tableNumber')
-  findByTableNumber(@Param('tableNumber') tableNumber: number) {
+  findByTableNumber(@Param('tableNumber') tableNumber: string) {
     return this.usersService.findByTableNumber(tableNumber);
   }
 
