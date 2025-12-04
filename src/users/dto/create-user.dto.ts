@@ -12,8 +12,10 @@ import {
 
 export class CreateUserDto {
   @ApiProperty()
-  @IsInt()
-  tableNumber: number;
+  @IsString()
+  @IsNotEmpty()
+  @Matches(/^\d+$/, { message: 'Table number must contain only digits' })
+  tableNumber: string;
 
   @ApiProperty()
   @IsString()
