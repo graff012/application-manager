@@ -16,25 +16,27 @@ export class AuthService {
 
   async login(tableNumber: string, jshshir: string) {
     try {
-      
+      const user = await this.usersService.findByTableNumberAndPassport(
+        tableNumber,
+        jshshir,
+      );
+      if (!user)
+        throw new UnauthorizedException(
+          'Table number or passport number is incorrect',
+        );
+
+      if (user.status === 'blocked') {
+        throw new UnauthorizedException('User is blocked');
+      }
+
+      const payload = {
+        sub: user._id.toString(),
+        tableNumber: user.tableNumber,
+      };
+      return { access_token: await this.jwtService.signAsync(payload) };
     } catch (err) {
       console.error('error occured in login function: ', err);
     }
-    const user = await this.usersService.findByTableNumberAndPassport(
-      tableNumber,
-      jshshir,
-    );
-    if (!user)
-      throw new UnauthorizedException(
-        'Table number or passport number is incorrect',
-      );
-
-    if (user.status === 'blocked') {
-      throw new UnauthorizedException('User is blocked');
-    }
-
-    const payload = { sub: user._id.toString(), tableNumber: user.tableNumber };
-    return { access_token: await this.jwtService.signAsync(payload) };
   }
 
   async adminLogin(email: string, password: string) {
