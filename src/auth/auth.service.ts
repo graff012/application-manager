@@ -15,6 +15,11 @@ export class AuthService {
   ) {}
 
   async login(tableNumber: string, jshshir: string) {
+    try {
+      
+    } catch (err) {
+      console.error('error occured in login function: ', err);
+    }
     const user = await this.usersService.findByTableNumberAndPassport(
       tableNumber,
       jshshir,
