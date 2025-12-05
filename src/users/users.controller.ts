@@ -49,6 +49,12 @@ export class UsersController {
     return this.usersService.findById(id);
   }
 
+  @Patch('me')
+  updateProfile(@Request() req, @Body() dto: UpdateProfileDto) {
+    // This endpoint remains for user self-profile updates (not admin only)
+    return this.usersService.updateProfile(req.user.userId, dto);
+  }
+
   @Get('tabel/:tableNumber')
   findByTableNumber(@Param('tableNumber') tableNumber: string) {
     return this.usersService.findByTableNumber(tableNumber);
@@ -66,9 +72,4 @@ export class UsersController {
     return this.usersService.remove(id);
   }
 
-  @Patch('me')
-  updateProfile(@Request() req, @Body() dto: UpdateProfileDto) {
-    // This endpoint remains for user self-profile updates (not admin only)
-    return this.usersService.updateProfile(req.user.userId, dto);
-  }
 }
