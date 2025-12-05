@@ -14,7 +14,7 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateProfileDto } from './dto/update-profile.dto';
+import { UpdateProfileDto, UpdateUserDto } from './dto/update-profile.dto';
 import { UsersService } from './users.service';
 
 @ApiTags('users')
@@ -44,14 +44,9 @@ export class UsersController {
     return this.usersService.findById(req.user.userId);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.usersService.findById(id);
-  }
-
+  // User self-update endpoint (must come before :id route)
   @Patch('me')
   updateProfile(@Request() req, @Body() dto: UpdateProfileDto) {
-    // This endpoint remains for user self-profile updates (not admin only)
     return this.usersService.updateProfile(req.user.userId, dto);
   }
 
@@ -60,10 +55,16 @@ export class UsersController {
     return this.usersService.findByTableNumber(tableNumber);
   }
 
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.usersService.findById(id);
+  }
+
+  // Admin update endpoint
   @Patch(':id')
   @Roles('admin')
-  update(@Param('id') id: string, @Body() dto: UpdateProfileDto) {
-    return this.usersService.updateProfile(id, dto);
+  update(@Param('id') id: string, @Body() dto: UpdateUserDto) {
+    return this.usersService.updateUser(id, dto);
   }
 
   @Delete(':id')
@@ -71,5 +72,4 @@ export class UsersController {
   delete(@Param('id') id: string) {
     return this.usersService.remove(id);
   }
-
 }
