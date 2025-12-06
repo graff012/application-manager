@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException, BadRequestException, InternalServerErrorException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, isValidObjectId } from 'mongoose';
 import * as bcrypt from 'bcrypt';
@@ -8,9 +13,39 @@ import { UpdateEmployeeDto } from './dto/update-employee.dto';
 
 @Injectable()
 export class EmployeesService {
-  constructor(@InjectModel(Employee.name) private employeeModel: Model<EmployeeDocument>) {}
+  constructor(
+    @InjectModel(Employee.name) private employeeModel: Model<EmployeeDocument>,
+  ) {}
 
   async create(dto: CreateEmployeeDto) {
+    if (!dto.phone || !dto.email || !dto.jshshir) {
+      throw new BadRequestException(
+        'phone, email, jshshir fields are required',
+      );
+    }
+
+    const existingByJshshir = await this.employeeModel
+      .findOne({ jshshir: dto.jshshir })
+      .exec();
+    if (existingByJshshir)
+      throw new BadRequestException(
+        'Employee with this jshshir already exists',
+      );
+
+    const existingEmail = await this.employeeModel
+      .findOne({ email: dto.email })
+      .exec();
+    if (existingEmail)
+      throw new BadRequestException('Employee with this email already exists');
+
+    const existingPhone = await this.employeeModel
+      .findOne({ phone: dto.phone })
+      .exec();
+    if (existingPhone)
+      throw new BadRequestException(
+        'Employee with this phone number already exists',
+      );
+
     const hashedPassword = await bcrypt.hash(dto.password, 10);
     return this.employeeModel.create({ ...dto, password: hashedPassword });
   }
@@ -24,6 +59,7 @@ export class EmployeesService {
         .populate('assignedApplications')
         .exec();
     } catch (error) {
+      console.error('Error occured while creating employee', error);
       throw new InternalServerErrorException('Failed to fetch employees');
     }
   }
@@ -43,7 +79,9 @@ export class EmployeesService {
         .populate('assignedApplications')
         .exec();
     } catch (error) {
-      throw new InternalServerErrorException('Failed to fetch employees by branch');
+      throw new InternalServerErrorException(
+        'Failed to fetch employees by branch',
+      );
     }
   }
 
@@ -106,7 +144,8 @@ export class EmployeesService {
     }
     try {
       const result = await this.employeeModel.deleteOne({ _id: id }).exec();
-      if (result.deletedCount === 0) throw new NotFoundException('Employee not found');
+      if (result.deletedCount === 0)
+        throw new NotFoundException('Employee not found');
       return { deleted: true };
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
@@ -119,7 +158,7 @@ export class EmployeesService {
       .findByIdAndUpdate(
         employeeId,
         { $addToSet: { assignedApplications: applicationId } },
-        { new: true }
+        { new: true },
       )
       .exec();
   }

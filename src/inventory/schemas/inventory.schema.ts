@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Types } from 'mongoose';
+import { types } from 'util';
 
 export type InventoryDocument = HydratedDocument<Inventory>;
 
@@ -29,8 +30,8 @@ export class Inventory {
   @Prop({ type: [{ type: Types.ObjectId, ref: 'Tag' }], default: [] })
   tags?: Types.ObjectId[];
 
-  @Prop({ type: [{ type: Types.ObjectId, ref: 'Tool' }], default: [] })
-  tools?: Types.ObjectId[];
+  // @Prop({ type: [{ type: Types.ObjectId, ref: 'Tool' }], default: [] })
+  // tools?: Types.ObjectId[];
 
   @Prop({ type: Types.ObjectId, ref: 'Branch' })
   branch?: Types.ObjectId;
@@ -56,6 +57,15 @@ export class Inventory {
         byModel: { type: String, enum: ['User', 'Employee'], required: true },
         at: { type: Date, default: () => new Date() },
         comment: { type: String },
+
+        // new: list of tools used in repair
+        usedTools: [
+          {
+            tool: { type: Types.ObjectId, ref: 'Tool', required: true },
+            quantity: { type: Number, required: true, min: 1 },
+          },
+        ],
+        writtenOffReason: { type: String },
       },
     ],
     default: [],
@@ -66,7 +76,14 @@ export class Inventory {
     byModel: string;
     at: Date;
     comment?: string;
+  usedTools?: {
+    tool: Types.ObjectId;
+    quantity: number;
+  }[];
+
+  writtenOffReason?: string;
   }>;
+
 }
 
 export const InventorySchema = SchemaFactory.createForClass(Inventory);

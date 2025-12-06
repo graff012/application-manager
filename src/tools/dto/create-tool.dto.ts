@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class CreateToolDto {
   @ApiProperty({ example: 'Screwdriver set' })
@@ -16,4 +16,11 @@ export class CreateToolDto {
   @IsString()
   @IsOptional()
   serial?: string;
+
+  @ApiProperty({ required: true, example: 0 })
+  @IsNumber()
+  quantity: number;
+
+  @ApiProperty({ example: 0 })
+  writtenOff: number;
 }
