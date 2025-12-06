@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class CreateToolDto {
@@ -18,9 +19,7 @@ export class CreateToolDto {
   serial?: string;
 
   @ApiProperty({ required: true, example: 0 })
+  @Type(() => Number)
   @IsNumber()
   quantity: number;
-
-  @ApiProperty({ example: 0 })
-  writtenOff: number;
 }

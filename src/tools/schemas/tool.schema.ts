@@ -14,11 +14,11 @@ export class Tool {
   @Prop({ required: false })
   serial?: string;
 
-  @Prop({type: Number, default: 0})
+  @Prop({ type: Number, default: 0 })
   quantity: number;
 
-  @Prop({type: Number, default: 0})
-  writtenOff: number
+  @Prop({ type: Number, default: 0, min: 0 })
+  writtenOff: number;
 }
 
 export const ToolSchema = SchemaFactory.createForClass(Tool);

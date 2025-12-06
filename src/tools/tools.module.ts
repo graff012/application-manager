@@ -5,7 +5,9 @@ import { ToolsService } from './tools.service';
 import { Tool, ToolSchema } from './schemas/tool.schema';
 
 @Module({
-  imports: [MongooseModule.forFeature([{ name: Tool.name, schema: ToolSchema }])],
+  imports: [
+    MongooseModule.forFeature([{ name: Tool.name, schema: ToolSchema }]),
+  ],
   controllers: [ToolsController],
   providers: [ToolsService],
   exports: [ToolsService],

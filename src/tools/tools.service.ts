@@ -7,7 +7,9 @@ import { UpdateToolDto } from './dto/update-tool.dto';
 
 @Injectable()
 export class ToolsService {
-  constructor(@InjectModel(Tool.name) private readonly toolModel: Model<ToolDocument>) {}
+  constructor(
+    @InjectModel(Tool.name) private readonly toolModel: Model<ToolDocument>,
+  ) {}
 
   create(dto: CreateToolDto) {
     return this.toolModel.create(dto);

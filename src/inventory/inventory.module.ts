@@ -1,11 +1,12 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { MulterModule } from '@nestjs/platform-express';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
 import { InventoryService } from './inventory.service';
 import { InventoryController } from './inventory.controller';
 import { Inventory, InventorySchema } from './schemas/inventory.schema';
 import { User, UserSchema } from '../users/schemas/user.schema';
+import { Tool, ToolSchema } from '../tools/schemas/tool.schema';
 import { CommonModule } from '../common/common.module';
 
 @Module({
@@ -14,6 +15,7 @@ import { CommonModule } from '../common/common.module';
     MongooseModule.forFeature([
       { name: Inventory.name, schema: InventorySchema },
       { name: User.name, schema: UserSchema },
+      { name: Tool.name, schema: ToolSchema }, // <-- important
     ]),
     ConfigModule,
     MulterModule.register({
@@ -21,7 +23,9 @@ import { CommonModule } from '../common/common.module';
         destination: './uploads/inventory',
         filename: (req, file, cb) => {
           const ext = file.originalname.split('.').pop();
-          const name = `${Date.now()}-${Math.round(Math.random() * 1e9)}.${ext}`;
+          const name = `${Date.now()}-${Math.round(
+            Math.random() * 1e9,
+          )}.${ext}`;
           cb(null, name);
         },
       }),

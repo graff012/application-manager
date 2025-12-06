@@ -30,7 +30,6 @@ export class InventoryController {
   private readonly qrCodeDir = path.join(process.cwd(), 'public', 'qrcodes');
 
   constructor(private readonly inventoryService: InventoryService) {
-    // Ensure QR code directory exists
     if (!fs.existsSync(this.qrCodeDir)) {
       fs.mkdirSync(this.qrCodeDir, { recursive: true });
     }
