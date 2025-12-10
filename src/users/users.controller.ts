@@ -34,6 +34,12 @@ export class UsersController {
     return this.usersService.findAll();
   }
 
+  @Get('count')
+  @Roles('admin')
+  getCountUsers() {
+    return this.usersService.getCountUsers();
+  }
+
   @Get('branch/:branchId')
   findByBranch(@Param('branchId') branchId: string) {
     return this.usersService.findByBranch(branchId);
@@ -71,11 +77,5 @@ export class UsersController {
   @Roles('admin')
   delete(@Param('id') id: string) {
     return this.usersService.remove(id);
-  }
-
-  @Get('count')
-  @Roles('admin')
-  getCountUsers() {
-    return this.usersService.getCountUsers();
   }
 }
