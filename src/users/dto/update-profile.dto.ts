@@ -38,6 +38,16 @@ export class UpdateUserDto {
   })
   phone?: string;
 
+  @ApiPropertyOptional({ example: '455' })
+  @IsOptional()
+  @IsString()
+  tableNumber?: string;
+
+  @ApiPropertyOptional({ example: '12345678900987' })
+  @IsOptional()
+  @IsString()
+  jshshir?: string;
+
   @ApiPropertyOptional({ enum: ['male', 'female', 'other'] })
   @IsOptional()
   @IsEnum(['male', 'female', 'other'])
