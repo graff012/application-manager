@@ -72,4 +72,10 @@ export class UsersController {
   delete(@Param('id') id: string) {
     return this.usersService.remove(id);
   }
+
+  @Get('count')
+  @Roles('admin')
+  getCountUsers() {
+    return this.usersService.getCountUsers();
+  }
 }

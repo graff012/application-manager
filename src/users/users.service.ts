@@ -160,4 +160,11 @@ export class UsersService {
       throw new NotFoundException('User not found');
     return { deleted: true };
   }
+
+  async getCountUsers() {
+    const result = await this.userModel.countDocuments();
+    console.log('count users: ', result);
+
+    return { result };
+  }
 }
