@@ -162,4 +162,9 @@ export class EmployeesService {
       )
       .exec();
   }
+
+  async getEmployeeCount() {
+    const result = await this.employeeModel.countDocuments();
+    return { result };
+  }
 }

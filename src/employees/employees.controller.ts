@@ -34,6 +34,12 @@ export class EmployeesController {
     return this.employeesService.findAll();
   }
 
+  @Get('count')
+  @Roles('admin')
+  getEmployeeCount() {
+    return this.employeesService.getEmployeeCount();
+  }
+
   @Get('branch/:branchId')
   @Roles('admin')
   findByBranch(@Param('branchId') branchId: string) {
