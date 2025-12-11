@@ -12,19 +12,17 @@ import { ApiTags } from '@nestjs/swagger';
 import { CreateDepartmentDto } from './dto/create-department.dto';
 import { DepartmentsService } from './departments.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { PermissionGuard } from 'src/auth/guards/permission.guard';
 import { RequirePermission } from 'src/auth/decorators/permissions.decorator';
 
 @ApiTags('departments')
 @Controller('departments')
-@UseGuards(JwtAuthGuard, RolesGuard, PermissionGuard)
+@UseGuards(JwtAuthGuard, PermissionGuard)
 export class DepartmentsController {
   constructor(private readonly departmentsService: DepartmentsService) {}
 
   @Post()
-  @Roles('admin')
   @RequirePermission('departments', 'create')
   create(@Body() dto: CreateDepartmentDto) {
     return this.departmentsService.create(dto);
