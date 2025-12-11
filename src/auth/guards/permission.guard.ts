@@ -23,12 +23,17 @@ export class PermissionGuard implements CanActivate {
 
     if (isPublic) return true;
 
-    const requiredPermissions = this.reflector.get<PermissionRequirement>(
+    const requiredPermission = this.reflector.get<PermissionRequirement>(
       'permission',
       context.getHandler(),
     );
 
-    if (!requiredPermissions && !isPublic) {
+    console.log('requiredPermission: ', requiredPermission);
+
+    if (!requiredPermission)
+      throw new ForbiddenException('Reqiered permission is null or undefined');
+
+    if (!requiredPermission && !isPublic) {
       throw new ForbiddenException(
         'Endpoint must have permission or be marked public',
       );
@@ -46,7 +51,7 @@ export class PermissionGuard implements CanActivate {
     }
 
     // check employee permission
-    const { resource, action } = requiredPermissions;
+    const { resource, action } = requiredPermission;
     const hasPermission = user.permissions?.[resource]?.[action] === true;
 
     if (!hasPermission) {
