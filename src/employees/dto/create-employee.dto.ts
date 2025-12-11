@@ -10,7 +10,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { PermissionDto } from './update-employee.dto';
+import { PermissionDto } from './permission.dto';
 import { Type } from 'class-transformer';
 
 export class CreateEmployeeDto {
