@@ -57,6 +57,7 @@ export class EmployeesService {
         .populate('branch')
         .populate('department')
         .populate('assignedApplications')
+        .select('+permissions')
         .exec();
     } catch (error) {
       console.error('Error occured while creating employee', error);
@@ -98,6 +99,7 @@ export class EmployeesService {
         .populate('branch')
         .populate('department')
         .populate('assignedApplications')
+        .select('+permissions')
         .exec();
       if (!employee) throw new NotFoundException('Employee not found');
       return employee;
@@ -108,7 +110,13 @@ export class EmployeesService {
   }
 
   async findByEmail(email: string) {
-    return this.employeeModel.findOne({ email }).exec();
+    const employee = await this.employeeModel
+      .findOne({ email })
+      .select('+permissions')
+      .exec();
+    if (!employee) throw NotFoundException('User with this email not found');
+
+    return employee;
   }
 
   async update(id: string, dto: UpdateEmployeeDto) {

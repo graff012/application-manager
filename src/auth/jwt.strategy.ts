@@ -18,9 +18,15 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     if (payload.sub && payload.tableNumber) {
       return { userId: payload.sub, tableNumber: payload.tableNumber };
     }
+
     // Handle admin/employee login (has userId, email, role)
     if (payload.userId && payload.email) {
-      return { userId: payload.userId, email: payload.email, role: payload.role };
+      return {
+        userId: payload.userId,
+        email: payload.email,
+        role: payload.role,
+        permissions: payload.permissions || {},
+      };
     }
     // Fallback
     return payload;

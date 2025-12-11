@@ -5,6 +5,47 @@ export type EmployeeDocument = HydratedDocument<Employee>;
 
 export type EmployeeStatus = 'active' | 'inactive';
 
+// define permission structure
+export class ResourcePermissions {
+  @Prop({ default: false })
+  create?: boolean;
+
+  @Prop({ default: false })
+  read?: boolean;
+
+  @Prop({ default: false })
+  update?: boolean;
+
+  @Prop({ default: false })
+  delete?: boolean;
+}
+
+export class Permissions {
+  @Prop({ type: ResourcePermissions, default: {} })
+  departments?: ResourcePermissions;
+
+  @Prop({ type: ResourcePermissions, default: {} })
+  employees?: ResourcePermissions;
+
+  @Prop({ type: ResourcePermissions, default: {} })
+  branches?: ResourcePermissions;
+
+  @Prop({ type: ResourcePermissions, default: {} })
+  applications?: ResourcePermissions;
+
+  @Prop({ type: ResourcePermissions, default: {} })
+  users?: ResourcePermissions;
+
+  @Prop({ type: ResourcePermissions, default: {} })
+  inventories?: ResourcePermissions;
+
+  @Prop({ type: ResourcePermissions, default: {} })
+  tags?: ResourcePermissions;
+
+  @Prop({ type: ResourcePermissions, default: {} })
+  tools?: ResourcePermissions;
+}
+
 @Schema({ timestamps: true })
 export class Employee {
   @Prop({ required: true })
@@ -39,6 +80,9 @@ export class Employee {
 
   @Prop({ default: 'employee' })
   role: string;
+
+  @Prop({ type: Permissions, default: {} })
+  permissions?: Permissions;
 }
 
 export const EmployeeSchema = SchemaFactory.createForClass(Employee);

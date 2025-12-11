@@ -36,11 +36,11 @@ export class AuthService {
       return { access_token: await this.jwtService.signAsync(payload) };
     } catch (err) {
       console.error('error occured in login function: ', err);
+      throw err;
     }
   }
 
   async adminLogin(email: string, password: string) {
-    // Try admin first
     const admin = await this.adminsService.findByEmail(email);
     if (admin) {
       const isPasswordValid = await bcrypt.compare(password, admin.password);
@@ -51,6 +51,7 @@ export class AuthService {
         userId: admin._id.toString(),
         email: admin.email,
         role: admin.role,
+        permissions: {},
       };
       return {
         access_token: await this.jwtService.signAsync(payload),
@@ -72,11 +73,13 @@ export class AuthService {
       userId: employee._id.toString(),
       email: employee.email,
       role: employee.role,
+      permissions: employee.permissions || {},
     };
     return {
       access_token: await this.jwtService.signAsync(payload),
       userId: employee._id.toString(),
       role: employee.role,
+      permissions: employee.permissions,
     };
   }
 }

@@ -21,10 +21,12 @@ import { FilesInterceptor } from '@nestjs/platform-express';
 import type { Response } from 'express';
 import * as path from 'path';
 import * as fs from 'fs';
+import { PermissionGuard } from 'src/auth/guards/permission.guard';
+import { RequirePermission } from 'src/auth/decorators/permissions.decorator';
 
 @ApiTags('inventory')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, PermissionGuard)
 @Controller('inventory')
 export class InventoryController {
   private readonly qrCodeDir = path.join(process.cwd(), 'public', 'qrcodes');
@@ -37,6 +39,7 @@ export class InventoryController {
 
   @Post()
   @ApiConsumes('multipart/form-data')
+  @RequirePermission('invetories', 'create')
   @UseInterceptors(FilesInterceptor('images', 10))
   async create(
     @Body() dto: CreateInventoryDto,
@@ -52,16 +55,19 @@ export class InventoryController {
   }
 
   @Get()
+  @RequirePermission('invetories', 'read')
   findAll() {
     return this.inventoryService.findAll();
   }
 
   @Get(':id')
+  @RequirePermission('invetories', 'read')
   findOne(@Param('id') id: string) {
     return this.inventoryService.findOne(id);
   }
 
   @Patch(':id')
+  @RequirePermission('invetories', 'update')
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FilesInterceptor('images', 10))
   async update(
@@ -84,12 +90,14 @@ export class InventoryController {
   }
 
   @Get('qr/:inventoryNumber')
+  @RequirePermission('invetories', 'read')
   @ApiTags('QR Code')
   async getByQrCode(@Param('inventoryNumber') inventoryNumber: string) {
     return this.inventoryService.findByInventoryNumber(inventoryNumber);
   }
 
   @Get('qrcode/:inventoryNumber/download')
+  @RequirePermission('invetories', 'read')
   @ApiTags('QR Code')
   async downloadQrCode(
     @Param('inventoryNumber') inventoryNumber: string,

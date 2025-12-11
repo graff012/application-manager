@@ -7,8 +7,11 @@ import {
   IsMongoId,
   Matches,
   Length,
+  ValidateNested,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { PermissionDto } from './update-employee.dto';
+import { Type } from 'class-transformer';
 
 export class CreateEmployeeDto {
   @ApiProperty()
@@ -59,4 +62,13 @@ export class CreateEmployeeDto {
   @IsOptional()
   @IsString()
   avatar?: string;
+
+  @ApiPropertyOptional({
+    description: 'permissions for employee',
+    type: PermissionDto,
+  })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => PermissionDto)
+  permissions?: PermissionDto;
 }
