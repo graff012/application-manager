@@ -2,7 +2,7 @@ import { SetMetadata } from '@nestjs/common';
 import { PermissionRequirement } from '../guards/permission.guard';
 
 export const Permissions = (...permissions: string[]) =>
-  SetMetadata('permissions', permissions);
+  SetMetadata('permission', permissions);
 
 export const RequirePermission = (
   resource: string,
