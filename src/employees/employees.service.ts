@@ -20,7 +20,7 @@ export class EmployeesService {
   async create(dto: CreateEmployeeDto) {
     if (!dto.phone || !dto.email || !dto.jshshir) {
       throw new BadRequestException(
-        'phone, email, jshshir fields are required!!!',
+        'phone, email, jshshir fields are required!!!!',
       );
     }
 
