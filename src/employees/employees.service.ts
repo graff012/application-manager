@@ -114,7 +114,7 @@ export class EmployeesService {
       .findOne({ email })
       .select('+permissions')
       .exec();
-    if (!employee) throw NotFoundException('User with this email not found');
+    if (!employee) throw new NotFoundException('User with this email not found');
 
     return employee;
   }
