@@ -24,7 +24,7 @@ export class BranchesController {
   constructor(private readonly branchesService: BranchesService) {}
 
   @Post()
-  @Roles('admin')
+  // @Roles('admin')
   @RequirePermission('branches', 'create')
   create(@Body() dto: CreateBranchDto) {
     return this.branchesService.create(dto);
