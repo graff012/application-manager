@@ -7,6 +7,9 @@ export type TagDocument = HydratedDocument<Tag>;
 export class Tag {
   @Prop({ required: true, unique: true })
   name: string;
+
+  @Prop({ required: true, unique: true })
+  type: string;
 }
 
 export const TagSchema = SchemaFactory.createForClass(Tag);

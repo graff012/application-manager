@@ -6,4 +6,9 @@ export class CreateTagDto {
   @IsString()
   @IsNotEmpty()
   name: string;
+
+  @ApiProperty({ example: 'for work' })
+  @IsString()
+  @IsNotEmpty()
+  type: string;
 }
