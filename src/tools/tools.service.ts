@@ -16,7 +16,7 @@ export class ToolsService {
   ) {}
 
   async create(dto: CreateToolDto) {
-    if (!dto.name || !dto.tagId || !dto.quantity || dto.toolNumber) {
+    if (!dto.name || !dto.tagId || !dto.quantity || !dto.toolNumber) {
       throw new BadRequestException(
         'name, tagId, quantity, toolNumber are required',
       );
