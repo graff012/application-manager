@@ -22,12 +22,19 @@ export class ToolsService {
       );
     }
 
+    const existingByToolNumber = await this.toolModel
+      .findOne({ name: dto.name })
+      .exec();
+
+    if (existingByToolNumber)
+      throw new BadRequestException('this tool Number already exists');
+
     const existingByName = await this.toolModel
       .findOne({ name: dto.name })
       .exec();
 
     if (existingByName)
-      throw new BadRequestException('This tool already exists');
+      throw new BadRequestException('This tool name already exists');
 
     return this.toolModel.create(dto);
   }
