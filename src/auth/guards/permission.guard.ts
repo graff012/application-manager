@@ -28,7 +28,7 @@ export class PermissionGuard implements CanActivate {
       context.getHandler(),
     );
 
-    console.log('requiredPermission: ', requiredPermission);
+    // console.log('requiredPermission: ', requiredPermission);
 
     if (!requiredPermission)
       throw new ForbiddenException('Reqiered permission is null or undefined');
@@ -42,7 +42,7 @@ export class PermissionGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
     const user = request.user;
 
-    console.log('user: ', user);
+    // console.log('user: ', user);
 
     if (!user) throw new ForbiddenException('User not authenticated');
 

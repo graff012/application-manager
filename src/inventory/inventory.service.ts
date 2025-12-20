@@ -4,10 +4,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Inventory, InventoryDocument } from './schemas/inventory.schema';
 import { CreateInventoryDto } from './dto/create-inventory.dto';
-import {
-  UpdateInventoryDto,
-  UsedToolDto,
-} from './dto/update-inventory.dto';
+import { UpdateInventoryDto, UsedToolDto } from './dto/update-inventory.dto';
 import { User, UserDocument } from '../users/schemas/user.schema';
 import { QrCodeService } from '../common/services/qr-code.service';
 import { Tool, ToolDocument } from '../tools/schemas/tool.schema';
@@ -95,18 +92,20 @@ export class InventoryService {
   }
 
   findAll() {
-    return this.invModel
-      .find()
-      .populate('assignedTo')
-      .populate('branch')
-      .populate('department')
-      .populate({
-        path: 'history.by',
-        select: 'fullName',
-      })
-      // if you later want to populate used tools:
-      // .populate('history.usedTools.tool')
-      .exec();
+    return (
+      this.invModel
+        .find()
+        .populate('assignedTo')
+        .populate('branch')
+        .populate('department')
+        .populate({
+          path: 'history.by',
+          select: 'fullName',
+        })
+        // if you later want to populate used tools:
+        // .populate('history.usedTools.tool')
+        .exec()
+    );
   }
 
   async findOne(id: string) {
