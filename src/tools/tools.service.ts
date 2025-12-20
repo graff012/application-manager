@@ -26,7 +26,8 @@ export class ToolsService {
       .findOne({ name: dto.name })
       .exec();
 
-    if (existingByName) throw new BadRequestException('This tool already exists')
+    if (existingByName)
+      throw new BadRequestException('This tool already exists');
 
     return this.toolModel.create(dto);
   }
