@@ -23,7 +23,7 @@ export class ToolsService {
     }
 
     const existingByToolNumber = await this.toolModel
-      .findOne({ name: dto.name })
+      .findOne({ toolNumber: dto.toolNumber })
       .exec();
 
     if (existingByToolNumber)
