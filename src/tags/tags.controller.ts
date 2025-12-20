@@ -31,9 +31,19 @@ export class TagsController {
     return this.tagsService.findAll();
   }
 
+  @Get('with-count')
+  findAllWithToolCount() {
+    return this.tagsService.findAllWithToolCount();
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.tagsService.findOne(id);
+  }
+
+  @Get(':id/with-count')
+  findOneWithToolCount(@Param('id') id: string) {
+    return this.tagsService.findOneWithToolCount(id);
   }
 
   @Patch(':id')

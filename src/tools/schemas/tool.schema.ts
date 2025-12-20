@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument } from 'mongoose';
+import { HydratedDocument, Types } from 'mongoose';
 
 export type ToolDocument = HydratedDocument<Tool>;
 
@@ -19,6 +19,9 @@ export class Tool {
 
   @Prop({ type: Number, default: 0, min: 0 })
   writtenOff: number;
+
+  @Prop({ type: Types.ObjectId, ref: 'tags', required: true })
+  tagId: Types.ObjectId;
 }
 
 export const ToolSchema = SchemaFactory.createForClass(Tool);

@@ -16,11 +16,11 @@ export class ToolsService {
   }
 
   findAll() {
-    return this.toolModel.find().exec();
+    return this.toolModel.find().populate('tagId').exec();
   }
 
   async findOne(id: string) {
-    const tool = await this.toolModel.findOne({ _id: id }).exec();
+    const tool = await this.toolModel.findOne({ _id: id }).populate('tagId').exec();
     if (!tool) throw new NotFoundException('Tool not found');
     return tool;
   }
@@ -28,6 +28,7 @@ export class ToolsService {
   async update(id: string, dto: UpdateToolDto) {
     const tool = await this.toolModel
       .findOneAndUpdate({ _id: id }, dto, { new: true })
+      .populate('tagId')
       .exec();
     if (!tool) throw new NotFoundException('Tool not found');
     return tool;
@@ -37,5 +38,9 @@ export class ToolsService {
     const res = await this.toolModel.deleteOne({ _id: id }).exec();
     if (!res.deletedCount) throw new NotFoundException('Tool not found');
     return { deleted: true };
+  }
+
+  async findByTag(tagId: string) {
+    return this.toolModel.find({ tagId }).populate('tagId').exec();
   }
 }

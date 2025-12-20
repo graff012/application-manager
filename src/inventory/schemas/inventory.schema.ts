@@ -1,6 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Types } from 'mongoose';
-import { types } from 'util';
 
 export type InventoryDocument = HydratedDocument<Inventory>;
 
@@ -76,14 +75,13 @@ export class Inventory {
     byModel: string;
     at: Date;
     comment?: string;
-  usedTools?: {
-    tool: Types.ObjectId;
-    quantity: number;
-  }[];
+    usedTools?: {
+      tool: Types.ObjectId;
+      quantity: number;
+    }[];
 
-  writtenOffReason?: string;
+    writtenOffReason?: string;
   }>;
-
 }
 
 export const InventorySchema = SchemaFactory.createForClass(Inventory);

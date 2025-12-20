@@ -41,6 +41,12 @@ export class ToolsController {
     return this.toolsService.findOne(id);
   }
 
+  @Get('tag/:tagId')
+  @RequirePermission('tools', 'read')
+  findByTag(@Param('tagId') tagId: string) {
+    return this.toolsService.findByTag(tagId);
+  }
+
   @Patch(':id')
   @RequirePermission('tools', 'update')
   update(@Param('id') id: string, @Body() dto: UpdateToolDto) {

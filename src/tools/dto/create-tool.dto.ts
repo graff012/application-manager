@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsOptional, IsString, IsMongoId } from 'class-validator';
 
 export class CreateToolDto {
   @ApiProperty({ example: 'Screwdriver set' })
@@ -22,4 +22,10 @@ export class CreateToolDto {
   @Type(() => Number)
   @IsNumber()
   quantity: number;
+
+  @ApiProperty({ required: true, example: '12345678923456' })
+  @IsString()
+  @IsNotEmpty()
+  @IsMongoId()
+  tagId: string;
 }
