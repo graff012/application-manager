@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   Post,
+  Req,
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
@@ -41,10 +42,23 @@ export class ToolsController {
     return this.toolsService.findOne(id);
   }
 
+  @Get(':id/count')
+  @RequirePermission('tools', 'read')
+  count(@Param('id') id: string) {
+    return this.toolsService.countOne(id);
+  }
+
+
   @Get('tag/:tagId')
   @RequirePermission('tools', 'read')
   findByTag(@Param('tagId') tagId: string) {
     return this.toolsService.findByTag(tagId);
+  }
+
+  @Get('tag/:tagId/count')
+  @RequirePermission('tools', 'read')
+  countByTag(@Param('tagId') tagId: string) {
+    return this.toolsService.countByTag(tagId);
   }
 
   @Patch(':id')
