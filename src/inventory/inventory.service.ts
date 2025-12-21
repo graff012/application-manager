@@ -1,5 +1,9 @@
 // src/inventory/inventory.service.ts
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Inventory, InventoryDocument } from './schemas/inventory.schema';
@@ -200,37 +204,45 @@ export class InventoryService {
       }
 
       for (const ut of dto.usedTools) {
-        const res = await this.toolModel.updateOne(
-          {
-            _id: ut.tool,
-            $expr: {$gte: [{$subtract: ['$quantity', '$writtenOff']}, ut.quantity]},
-          },
-          {$inc: {writtenOff: ut.quantity}}
-        ).exec();
+        const res = await this.toolModel
+          .updateOne(
+            {
+              _id: ut.tool,
+              $expr: {
+                $gte: [
+                  { $subtract: ['$quantity', '$writtenOff'] },
+                  ut.quantity,
+                ],
+              },
+            },
+            { $inc: { writtenOff: ut.quantity } },
+          )
+          .exec();
 
         if (res.modifiedCount === 0) {
           // Either tool not found of insufficient stock
           const tool = await this.toolModel.findById(ut.tool).exec();
-          if (!tool) throw new NotFoundException(`Tool ${ut.tool} not found`)
-          
+          if (!tool) throw new NotFoundException(`Tool ${ut.tool} not found`);
+
           const available = (tool.quantity ?? 0) - (tool.writtenOff ?? 0);
           throw new BadRequestException(
-            `Not enough stock for tool ${tool.name}. Available: ${available}, requested: ${ut.quantity}`
-          )
+            `Not enough stock for tool ${tool.name}. Available: ${available}, requested: ${ut.quantity}`,
+          );
         }
+      }
+
+      // Add history entry
+      if (!update.$push) update.$push = {};
+      update.$push.history = historyEntry;
+
+      const updated = await this.invModel
+        .findByIdAndUpdate(id, update, { new: true })
+        .exec();
+
+      if (dto.user && dto.user.toString() !== existing.assignedTo?.toString()) {
+        await this.logUserHistory(dto.user, updated!._id, 'updated');
+      }
+      return updated;
     }
-
-    // Add history entry
-    if (!update.$push) update.$push = {};
-    update.$push.history = historyEntry;
-
-    const updated = await this.invModel
-      .findByIdAndUpdate(id, update, { new: true })
-      .exec();
-
-    if (dto.user && dto.user.toString() !== existing.assignedTo?.toString()) {
-      await this.logUserHistory(dto.user, updated!._id, 'updated');
-    }
-    return updated;
   }
 }
