@@ -1,5 +1,5 @@
 // src/inventory/inventory.service.ts
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Inventory, InventoryDocument } from './schemas/inventory.schema';
@@ -200,23 +200,24 @@ export class InventoryService {
       }
 
       for (const ut of dto.usedTools) {
-        const tool = await this.toolModel.findById(ut.tool).exec();
-        if (!tool) {
-          throw new NotFoundException(`Tool ${ut.tool} not found`);
-        }
+        const res = await this.toolModel.updateOne(
+          {
+            _id: ut.tool,
+            $expr: {$gte: [{$subtract: ['$quantity', '$writtenOff']}, ut.quantity]},
+          },
+          {$inc: {writtenOff: ut.quantity}}
+        ).exec();
 
-        const available = tool.quantity - tool.writtenOff;
-        if (available < ut.quantity) {
-          throw new Error(
-            `Not enough stock for tool ${tool.name}. Available: ${available}, requested: ${ut.quantity}`,
-          );
+        if (res.modifiedCount === 0) {
+          // Either tool not found of insufficient stock
+          const tool = await this.toolModel.findById(ut.tool).exec();
+          if (!tool) throw new NotFoundException(`Tool ${ut.tool} not found`)
+          
+          const available = (tool.quantity ?? 0) - (tool.writtenOff ?? 0);
+          throw new BadRequestException(
+            `Not enough stock for tool ${tool.name}. Available: ${available}, requested: ${ut.quantity}`
+          )
         }
-
-        await this.toolModel.updateOne(
-          { _id: ut.tool },
-          { $inc: { writtenOff: ut.quantity } },
-        );
-      }
     }
 
     // Add history entry
