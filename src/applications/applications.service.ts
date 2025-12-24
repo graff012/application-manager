@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Application, ApplicationDocument } from './schemas/application.schema';
@@ -13,7 +17,7 @@ export class ApplicationsService {
     @InjectModel(Application.name) private appModel: Model<ApplicationDocument>,
     private readonly telegram: TelegramService,
     private readonly config: ConfigService,
-    private readonly employeeGateway: EmployeeGateway
+    private readonly employeeGateway: EmployeeGateway,
   ) {}
 
   private async generateIndex(): Promise<string> {
@@ -51,7 +55,7 @@ export class ApplicationsService {
     if (chatId && /^-?\d+$/.test(chatId)) {
       await this.telegram.sendMessage(
         chatId,
-        `Application ${index} created with issue: ${created.issue}.`
+        `Application ${index} created with issue: ${created.issue}.`,
       );
     }
     return created;
@@ -126,7 +130,7 @@ export class ApplicationsService {
       if (chatId && /^-?\d+$/.test(chatId)) {
         await this.telegram.sendMessage(
           chatId,
-          `Application ${updated.index} status updated to ${status}.`
+          `Application ${updated.index} status updated to ${status}.`,
         );
       }
     }
@@ -136,7 +140,7 @@ export class ApplicationsService {
   async assignToEmployee(
     applicationId: string,
     employeeId: string,
-    employeeName: string
+    employeeName: string,
   ) {
     const app = await this.appModel.findById(applicationId).exec();
     if (!app) throw new NotFoundException('Application not found');
@@ -163,7 +167,7 @@ export class ApplicationsService {
 
     // Telegram notification
     await this.telegram.sendTestNotification(
-      `Application ${app.index} assigned to ${employeeName}`
+      `Application ${app.index} assigned to ${employeeName}`,
     );
 
     return app;
@@ -174,7 +178,7 @@ export class ApplicationsService {
     newStatus: string,
     employeeId: string,
     employeeName: string,
-    comment?: string
+    comment?: string,
   ) {
     const app = await this.appModel.findById(applicationId).exec();
     if (!app) throw new NotFoundException('Application not found');
@@ -208,7 +212,7 @@ export class ApplicationsService {
 
     // Telegram notification
     await this.telegram.sendTestNotification(
-      `Application ${app.index} status changed to ${newStatus} by ${employeeName}`
+      `Application ${app.index} status changed to ${newStatus} by ${employeeName}`,
     );
 
     return app;

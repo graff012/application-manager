@@ -28,11 +28,18 @@ export class ApplicationsController {
   @ApiConsumes('multipart/form-data')
   @RequirePermission('applications', 'create')
   @UseInterceptors(FilesInterceptor('images', 10))
-  async create(
-    @Body() dto: CreateApplicationDto,
-    @UploadedFiles() files: any[],
-  ) {
-    const urls = (files || []).map((f: any) => f.path).filter(Boolean);
+  async create(@Body() dto: CreateApplicationDto, @UploadedFiles() files: any[]) {
+    // Normalize and store URL-friendly paths:
+    // - convert Windows "\" to "/"
+    // - ensure the stored value can be used directly after `/api` prefix:
+    //   e.g. `/api/uploads/applications/<filename>`
+    const urls = (files || [])
+      .map((f: any) => (f?.path ? String(f.path).replace(/\\/g, '/') : ''))
+      .filter(Boolean)
+      // If multer returns something like "../uploads/applications/abc.jpg" or "uploads/applications/abc.jpg",
+      // we want to store it consistently as "uploads/applications/abc.jpg"
+      .map((p: string) => p.replace(/^(\.\.\/)+/g, '').replace(/^\/+/g, ''));
+
     return this.applicationsService.create(dto, urls);
   }
 

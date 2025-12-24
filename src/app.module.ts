@@ -1,6 +1,9 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
+
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
@@ -17,12 +20,20 @@ import { ToolsModule } from './tools/tools.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+
+    // Serve ./uploads as public files under /uploads
+    ServeStaticModule.forRoot({
+      rootPath: join(process.cwd(), '..', 'uploads'),
+      serveRoot: '/uploads',
+    }),
+
     MongooseModule.forRootAsync({
       inject: [ConfigService],
       useFactory: async (config: ConfigService) => ({
         uri: config.get<string>('MONGO_URI'),
       }),
     }),
+
     DatabaseModule,
     UsersModule,
     BranchesModule,
