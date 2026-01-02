@@ -8,7 +8,7 @@ import { join } from 'path';
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
-  // Existing: Serve static files from public directory
+  // Serve static files from public directory
   app.useStaticAssets(join(__dirname, '..', 'public'), {
     prefix: '/public/',
   });
@@ -25,9 +25,10 @@ async function bootstrap() {
   // Global API prefix
   app.setGlobalPrefix('api');
 
-  // IMPORTANT: Serve uploads from one level above project root.
-  // Final URL will be: /api/uploads/...
-  app.useStaticAssets(join(process.cwd(), '..', 'uploads'), {
+  // ✅ Serve uploads from *project root* uploads folder
+  // Files are here: application-manager/uploads/...
+  // URL will be: /api/uploads/...
+  app.useStaticAssets(join(process.cwd(), 'uploads'), {
     prefix: '/api/uploads/',
   });
 
