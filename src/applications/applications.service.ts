@@ -1,6 +1,8 @@
 import {
   BadRequestException,
   Injectable,
+  InternalServerErrorException,
+  HttpException,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
@@ -21,111 +23,141 @@ export class ApplicationsService {
   ) {}
 
   private async generateIndex(): Promise<string> {
-    const year = new Date().getFullYear();
-    const last = await this.appModel
-      .findOne({ index: { $regex: `-${year}$` } })
-      .sort({ createdAt: -1 })
-      .exec();
-    let nextNum = 1;
-    if (last) {
-      const [numStr] = last.index.split('-');
-      nextNum = parseInt(numStr, 10) + 1;
+    try {
+      const year = new Date().getFullYear();
+      const last = await this.appModel
+        .findOne({ index: { $regex: `-${year}$` } })
+        .sort({ createdAt: -1 })
+        .exec();
+      let nextNum = 1;
+      if (last) {
+        const [numStr] = last.index.split('-');
+        nextNum = parseInt(numStr, 10) + 1;
+      }
+      const padded = String(nextNum).padStart(5, '0');
+      return `${padded}-${year}`;
+    } catch (error) {
+      this.handleError(error, 'Failed to generate application index.');
     }
-    const padded = String(nextNum).padStart(5, '0');
-    return `${padded}-${year}`;
   }
 
   async create(dto: CreateApplicationDto, imageUrls: string[]) {
-    const index = await this.generateIndex();
-    const created = await this.appModel.create({
-      ...dto,
-      index,
-      images: imageUrls,
-      history: [
-        {
-          status: 'new',
-          changedBy: dto.user,
-          changedByModel: 'User',
-          changedAt: new Date(),
-          comment: 'Ariza yaratildi',
-        },
-      ],
-    });
-    const chatId = this.config.get<string>('TELEGRAM_CHAT_ID');
-    if (chatId && /^-?\d+$/.test(chatId)) {
-      await this.telegram.sendMessage(
-        chatId,
-        `Application ${index} created with issue: ${created.issue}.`,
-      );
+    try {
+      const index = await this.generateIndex();
+      const created = await this.appModel.create({
+        ...dto,
+        index,
+        images: imageUrls,
+        history: [
+          {
+            status: 'new',
+            changedBy: dto.user,
+            changedByModel: 'User',
+            changedAt: new Date(),
+            comment: 'Ariza yaratildi',
+          },
+        ],
+      });
+      const chatId = this.config.get<string>('TELEGRAM_CHAT_ID');
+      if (chatId && /^-?\d+$/.test(chatId)) {
+        await this.telegram.sendMessage(
+          chatId,
+          `Application ${index} created with issue: ${created.issue}.`,
+        );
+      }
+      return created;
+    } catch (error) {
+      this.handleError(error, 'Failed to create application.');
     }
-    return created;
   }
 
   findAll(filter: any = {}) {
-    return this.appModel
-      .find(filter)
-      .populate('user')
-      .populate('branch')
-      .populate('department')
-      .populate('assignedTo')
-      .populate('inventory')
-      .populate({
-        path: 'history.changedBy',
-        select: 'fullName',
-      })
-      .exec();
+    try {
+      return this.appModel
+        .find(filter)
+        .populate('user')
+        .populate('branch')
+        .populate('department')
+        .populate('assignedTo')
+        .populate('inventory')
+        .populate({
+          path: 'history.changedBy',
+          select: 'fullName',
+        })
+        .exec();
+    } catch (error) {
+      this.handleError(error, 'Failed to load applications.');
+    }
   }
 
   async findOne(id: string) {
-    const app = await this.appModel
-      .findById(id)
-      .populate('user')
-      .populate('branch')
-      .populate('department')
-      .populate('assignedTo')
-      .populate('inventory')
-      .populate({
-        path: 'history.changedBy',
-        select: 'fullName',
-      })
-      .exec();
-    if (!app) throw new NotFoundException('Application not found');
-    return app;
+    try {
+      const app = await this.appModel
+        .findById(id)
+        .populate('user')
+        .populate('branch')
+        .populate('department')
+        .populate('assignedTo')
+        .populate('inventory')
+        .populate({
+          path: 'history.changedBy',
+          select: 'fullName',
+        })
+        .exec();
+      if (!app) throw new NotFoundException('Application not found');
+      return app;
+    } catch (error) {
+      this.handleError(error, 'Failed to load application.');
+    }
   }
 
   async findByUser(userId: string) {
-    return this.appModel
-      .find({ user: userId })
-      .populate('assignedTo')
-      .populate('inventory')
-      .populate({
-        path: 'history.changedBy',
-        select: 'fullName',
-      })
-      .exec();
+    try {
+      return await this.appModel
+        .find({ user: userId })
+        .populate('assignedTo')
+        .populate('inventory')
+        .populate({
+          path: 'history.changedBy',
+          select: 'fullName',
+        })
+        .exec();
+    } catch (error) {
+      this.handleError(error, 'Failed to load user applications.');
+    }
   }
 
   async findByEmployee(employeeId: any) {
-    return this.appModel
-      .find({ assignedTo: employeeId })
-      .populate('user')
-      .populate('branch')
-      .populate('department')
-      .exec();
+    try {
+      return await this.appModel
+        .find({ assignedTo: employeeId })
+        .populate('user')
+        .populate('branch')
+        .populate('department')
+        .exec();
+    } catch (error) {
+      this.handleError(error, 'Failed to load employee applications.');
+    }
   }
 
   async updateApplication(id: string, dto: CreateApplicationDto) {
-    const updated = await this.appModel
-      .findByIdAndUpdate(id, dto, { new: true })
-      .exec();
-    return updated;
+    try {
+      const updated = await this.appModel
+        .findByIdAndUpdate(id, dto, { new: true })
+        .exec();
+      if (!updated) throw new NotFoundException('Application not found');
+      return updated;
+    } catch (error) {
+      this.handleError(error, 'Failed to update application.');
+    }
   }
 
   async updateStatus(id: string, status: string) {
-    const updated = await this.appModel
-      .findByIdAndUpdate(id, { status }, { new: true })
-      .exec();
-    if (updated) {
+    try {
+      const updated = await this.appModel
+        .findByIdAndUpdate(id, { status }, { new: true })
+        .exec();
+      if (!updated) throw new NotFoundException('Application not found');
       const chatId = this.config.get<string>('TELEGRAM_CHAT_ID');
       if (chatId && /^-?\d+$/.test(chatId)) {
         await this.telegram.sendMessage(
@@ -133,8 +165,10 @@ export class ApplicationsService {
           `Application ${updated.index} status updated to ${status}.`,
         );
       }
+      return updated;
+    } catch (error) {
+      this.handleError(error, 'Failed to update application status.');
     }
-    return updated;
   }
 
   async assignToEmployee(
@@ -142,35 +176,39 @@ export class ApplicationsService {
     employeeId: string,
     employeeName: string,
   ) {
-    const app = await this.appModel.findById(applicationId).exec();
-    if (!app) throw new NotFoundException('Application not found');
+    try {
+      const app = await this.appModel.findById(applicationId).exec();
+      if (!app) throw new NotFoundException('Application not found');
 
-    const employeeObjectId = new Types.ObjectId(employeeId);
-    app.assignedTo = employeeObjectId;
-    app.status = 'assigned';
-    app.history.push({
-      status: 'assigned',
-      changedBy: employeeObjectId,
-      changedByModel: 'Employee',
-      changedAt: new Date(),
-      comment: `Assigned to ${employeeName}`,
-    });
+      const employeeObjectId = new Types.ObjectId(employeeId);
+      app.assignedTo = employeeObjectId;
+      app.status = 'assigned';
+      app.history.push({
+        status: 'assigned',
+        changedBy: employeeObjectId,
+        changedByModel: 'Employee',
+        changedAt: new Date(),
+        comment: `Assigned to ${employeeName}`,
+      });
 
-    await app.save();
+      await app.save();
 
-    // WebSocket notification
-    this.employeeGateway.broadcastAppAssigned({
-      applicationId: app._id.toString(),
-      employeeId,
-      employeeName,
-    });
+      // WebSocket notification
+      this.employeeGateway.broadcastAppAssigned({
+        applicationId: app._id.toString(),
+        employeeId,
+        employeeName,
+      });
 
-    // Telegram notification
-    await this.telegram.sendTestNotification(
-      `Application ${app.index} assigned to ${employeeName}`,
-    );
+      // Telegram notification
+      await this.telegram.sendTestNotification(
+        `Application ${app.index} assigned to ${employeeName}`,
+      );
 
-    return app;
+      return app;
+    } catch (error) {
+      this.handleError(error, 'Failed to assign application.');
+    }
   }
 
   async updateApplicationStatus(
@@ -180,41 +218,52 @@ export class ApplicationsService {
     employeeName: string,
     comment?: string,
   ) {
-    const app = await this.appModel.findById(applicationId).exec();
-    if (!app) throw new NotFoundException('Application not found');
+    try {
+      const app = await this.appModel.findById(applicationId).exec();
+      if (!app) throw new NotFoundException('Application not found');
 
-    const trimmedComment = comment?.trim();
+      const trimmedComment = comment?.trim();
 
-    if (newStatus === 'rejected' && !trimmedComment) {
-      throw new BadRequestException('Rejection requires a comment (reason).');
+      if (newStatus === 'rejected' && !trimmedComment) {
+        throw new BadRequestException('Rejection requires a comment (reason).');
+      }
+
+      const employeeObjectId = new Types.ObjectId(employeeId);
+      app.status = newStatus as any;
+      app.history.push({
+        status: newStatus,
+        changedBy: employeeObjectId,
+        changedByModel: 'Employee',
+        changedAt: new Date(),
+        comment: trimmedComment || `Status changed by ${employeeName}`,
+      });
+
+      await app.save();
+
+      // WebSocket notification
+      this.employeeGateway.broadcastStatusChanged({
+        applicationId: app._id.toString(),
+        newStatus,
+        changedBy: employeeName,
+        timestamp: new Date(),
+        employeeId,
+      });
+
+      // Telegram notification
+      await this.telegram.sendTestNotification(
+        `Application ${app.index} status changed to ${newStatus} by ${employeeName}`,
+      );
+
+      return app;
+    } catch (error) {
+      this.handleError(error, 'Failed to update application status.');
     }
+  }
 
-    const employeeObjectId = new Types.ObjectId(employeeId);
-    app.status = newStatus as any;
-    app.history.push({
-      status: newStatus,
-      changedBy: employeeObjectId,
-      changedByModel: 'Employee',
-      changedAt: new Date(),
-      comment: trimmedComment || `Status changed by ${employeeName}`,
-    });
-
-    await app.save();
-
-    // WebSocket notification
-    this.employeeGateway.broadcastStatusChanged({
-      applicationId: app._id.toString(),
-      newStatus,
-      changedBy: employeeName,
-      timestamp: new Date(),
-      employeeId,
-    });
-
-    // Telegram notification
-    await this.telegram.sendTestNotification(
-      `Application ${app.index} status changed to ${newStatus} by ${employeeName}`,
-    );
-
-    return app;
+  private handleError(error: unknown, message: string): never {
+    if (error instanceof HttpException) {
+      throw error;
+    }
+    throw new InternalServerErrorException(message);
   }
 }

@@ -25,13 +25,6 @@ async function bootstrap() {
   // Global API prefix
   app.setGlobalPrefix('api');
 
-  // ✅ Serve uploads from *project root* uploads folder
-  // Files are here: application-manager/uploads/...
-  // URL will be: /api/uploads/...
-  // app.useStaticAssets(join(process.cwd(), 'uploads'), {
-  //   prefix: '/api/uploads/',
-  // });
-
   app.enableCors({
     origin: process.env.FRONTEND_ORIGIN || '*',
     credentials: false,

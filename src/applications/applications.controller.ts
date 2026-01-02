@@ -28,14 +28,10 @@ export class ApplicationsController {
   @ApiConsumes('multipart/form-data')
   @RequirePermission('applications', 'create')
   @UseInterceptors(FilesInterceptor('images', 10))
-  async create(
-    @Body() dto: CreateApplicationDto,
-    @UploadedFiles() files: any[],
-  ) {
+  async create(@Body() dto: CreateApplicationDto, @UploadedFiles() files: any[]) {
     const urls = (files || [])
-      .map((f: any) => (f?.path ? String(f.path).replace(/\\/g, '/') : ''))
-      .filter(Boolean)
-      .map((p: string) => p.replace(/^(\.\.\/)+/g, '').replace(/^\/+/g, ''));
+      .map((f: any) => this.toUploadsUrlPath(f?.path))
+      .filter(Boolean);
 
     return this.applicationsService.create(dto, urls);
   }
@@ -52,5 +48,21 @@ export class ApplicationsController {
   findOne(@Param('id') id: string) {
     return this.applicationsService.findOne(id);
   }
-}
 
+  private toUploadsUrlPath(filePath?: string): string {
+    if (!filePath) {
+      return '';
+    }
+
+    const normalized = String(filePath)
+      .replace(/\\/g, '/')
+      .replace(/^(\.\.\/)+/g, '')
+      .replace(/^\.?\//g, '');
+
+    const uploadsIndex = normalized.indexOf('uploads/');
+    const relativePath =
+      uploadsIndex >= 0 ? normalized.slice(uploadsIndex) : normalized;
+
+    return `/${relativePath}`;
+  }
+}
