@@ -8,6 +8,7 @@ import { Inventory, InventorySchema } from './schemas/inventory.schema';
 import { User, UserSchema } from '../users/schemas/user.schema';
 import { Tool, ToolSchema } from '../tools/schemas/tool.schema';
 import { CommonModule } from '../common/common.module';
+import { join } from 'path';
 
 @Module({
   imports: [
@@ -20,7 +21,7 @@ import { CommonModule } from '../common/common.module';
     ConfigModule,
     MulterModule.register({
       storage: require('multer').diskStorage({
-        destination: '/uploads/inventory',
+        destination: join(process.cwd(), 'uploads', 'inventory')
         filename: (req, file, cb) => {
           const ext = file.originalname.split('.').pop();
           const name = `${Date.now()}-${Math.round(
