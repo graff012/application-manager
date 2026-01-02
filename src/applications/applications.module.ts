@@ -15,7 +15,9 @@ import { EmployeesModule } from '../employees/employees.module';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: Application.name, schema: ApplicationSchema }]),
+    MongooseModule.forFeature([
+      { name: Application.name, schema: ApplicationSchema },
+    ]),
     TelegramModule,
     EmployeesModule,
     ConfigModule,

@@ -20,7 +20,7 @@ import { CommonModule } from '../common/common.module';
     ConfigModule,
     MulterModule.register({
       storage: require('multer').diskStorage({
-        destination: './uploads/inventory',
+        destination: '/uploads/inventory',
         filename: (req, file, cb) => {
           const ext = file.originalname.split('.').pop();
           const name = `${Date.now()}-${Math.round(

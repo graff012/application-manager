@@ -23,7 +23,7 @@ import { ToolsModule } from './tools/tools.module';
 
     // Serve ./uploads as public files under /uploads
     ServeStaticModule.forRoot({
-      rootPath: join(process.cwd(), '..', 'uploads'),
+rootPath: join(process.cwd(), 'uploads'),
       serveRoot: '/uploads',
     }),
 
