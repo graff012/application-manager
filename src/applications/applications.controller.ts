@@ -53,3 +53,4 @@ export class ApplicationsController {
     return this.applicationsService.findOne(id);
   }
 }
+
