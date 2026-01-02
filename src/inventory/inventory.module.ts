@@ -21,7 +21,7 @@ import { join } from 'path';
     ConfigModule,
     MulterModule.register({
       storage: require('multer').diskStorage({
-        destination: join(process.cwd(), 'uploads', 'inventory')
+        destination: join(process.cwd(), 'uploads', 'inventory'),
         filename: (req, file, cb) => {
           const ext = file.originalname.split('.').pop();
           const name = `${Date.now()}-${Math.round(
