@@ -28,7 +28,10 @@ export class ApplicationsController {
   @ApiConsumes('multipart/form-data')
   @RequirePermission('applications', 'create')
   @UseInterceptors(FilesInterceptor('images', 10))
-  async create(@Body() dto: CreateApplicationDto, @UploadedFiles() files: any[]) {
+  async create(
+    @Body() dto: CreateApplicationDto,
+    @UploadedFiles() files: any[],
+  ) {
     const urls = (files || [])
       .map((f: any) => (f?.path ? String(f.path).replace(/\\/g, '/') : ''))
       .filter(Boolean)

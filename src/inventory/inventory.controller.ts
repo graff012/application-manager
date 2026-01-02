@@ -46,7 +46,9 @@ export class InventoryController {
     @UploadedFiles() files: any[],
     @Request() req,
   ) {
-    const urls = (files || []).map((f: any) => f.path).filter(Boolean);
+    const urls = (files || [])
+      .map((f: any) => this.toUploadsUrlPath(f?.path))
+      .filter(Boolean);
     const employeeId =
       req.user?.role === 'employee' || req.user?.role === 'admin'
         ? req.user.userId
@@ -76,7 +78,9 @@ export class InventoryController {
     @UploadedFiles() files: any[],
     @Request() req,
   ) {
-    const urls = (files || []).map((f: any) => f.path).filter(Boolean);
+    const urls = (files || [])
+      .map((f: any) => this.toUploadsUrlPath(f?.path))
+      .filter(Boolean);
     const employeeId =
       req.user?.role === 'employee' || req.user?.role === 'admin'
         ? req.user.userId
@@ -116,5 +120,22 @@ export class InventoryController {
 
     const fileName = `inventory-${inventoryNumber}-qrcode.png`;
     res.download(filePath, fileName);
+  }
+
+  private toUploadsUrlPath(filePath?: string): string {
+    if (!filePath) {
+      return '';
+    }
+
+    const normalized = String(filePath)
+      .replace(/\\/g, '/')
+      .replace(/^(\.\.\/)+/g, '')
+      .replace(/^\.?\//g, '');
+
+    const uploadsIndex = normalized.indexOf('uploads/');
+    const relativePath =
+      uploadsIndex >= 0 ? normalized.slice(uploadsIndex) : normalized;
+
+    return `/${relativePath}`;
   }
 }
