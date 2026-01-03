@@ -10,6 +10,9 @@ export class Tag {
 
   @Prop({ required: true, unique: true })
   type: string;
+
+  @Prop()
+  image?: string;
 }
 
 export const TagSchema = SchemaFactory.createForClass(Tag);
