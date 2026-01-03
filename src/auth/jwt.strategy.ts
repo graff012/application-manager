@@ -16,7 +16,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   async validate(payload: any) {
     // Handle user login (has sub and tableNumber)
     if (payload.sub && payload.tableNumber) {
-      return { userId: payload.sub, tableNumber: payload.tableNumber };
+      return { userId: payload.sub, tableNumber: payload.tableNumber, role: payload.role || 'user' };
     }
 
     // Handle admin/employee login (has userId, email, role)

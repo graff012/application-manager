@@ -32,6 +32,7 @@ export class AuthService {
       const payload = {
         sub: user._id.toString(),
         tableNumber: user.tableNumber,
+        role: 'user',
       };
       return { access_token: await this.jwtService.signAsync(payload) };
     } catch (err) {
