@@ -1,7 +1,6 @@
 // src/inventory/inventory.service.ts
 import {
   BadRequestException,
-  ConflictException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -53,15 +52,6 @@ export class InventoryService {
     const qrCodeUrl = await this.qrCodeService.getQrCodeUrl(
       dto.inventoryNumber,
     );
-
-    const invNumber = await this.invModel
-      .findOne({
-        inventoryNumber: dto.inventoryNumber,
-      })
-      .exec();
-
-    if (invNumber)
-      throw new ConflictException('Inventory Number already exists');
 
     let assignedTo: Types.ObjectId | undefined;
     let assignedToModel: 'User' | 'Employee' | undefined;
@@ -240,19 +230,19 @@ export class InventoryService {
           );
         }
       }
-
-      // Add history entry
-      if (!update.$push) update.$push = {};
-      update.$push.history = historyEntry;
-
-      const updated = await this.invModel
-        .findByIdAndUpdate(id, update, { new: true })
-        .exec();
-
-      if (dto.user && dto.user.toString() !== existing.assignedTo?.toString()) {
-        await this.logUserHistory(dto.user, updated!._id, 'updated');
-      }
-      return updated;
     }
+
+    // Add history entry
+    if (!update.$push) update.$push = {};
+    update.$push.history = historyEntry;
+
+    const updated = await this.invModel
+      .findByIdAndUpdate(id, update, { new: true })
+      .exec();
+
+    if (dto.user && dto.user.toString() !== existing.assignedTo?.toString()) {
+      await this.logUserHistory(dto.user, updated!._id, 'updated');
+    }
+    return updated;
   }
 }
