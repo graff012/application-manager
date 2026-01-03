@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Tag, TagDocument } from './schemas/tag.schema';
@@ -14,8 +14,14 @@ export class TagsService {
     @InjectConnection() private readonly connection: Connection,
   ) {}
 
-  create(dto: CreateTagDto) {
-    return this.tagModel.create(dto);
+  async create(dto: CreateTagDto) {
+    try {
+      return await this.tagModel.create(dto);
+    } catch (err) {
+      if (err?.code === 11000) {
+        throw new ConflictException('Tag type already exists');
+      }
+    }
   }
 
   findAll() {
