@@ -16,7 +16,7 @@ import { TagsService } from './tags.service';
 import { CreateTagDto } from './dto/create-tag.dto';
 import { UpdateTagDto } from './dto/update-tag.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
-import type { Express } from 'express';
+import type { Multer } from 'multer';
 
 @ApiTags('tags')
 @ApiBearerAuth()
@@ -28,7 +28,7 @@ export class TagsController {
   @Post()
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FileInterceptor('image'))
-  create(@Body() dto: CreateTagDto, @UploadedFile() file?: Express.Multer.File) {
+  create(@Body() dto: CreateTagDto, @UploadedFile() file?: Multer.File) {
     if (file?.path) {
       dto.image = this.toUploadsUrlPath(file.path);
     }
