@@ -1,6 +1,7 @@
 // src/inventory/inventory.service.ts
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -52,6 +53,15 @@ export class InventoryService {
     const qrCodeUrl = await this.qrCodeService.getQrCodeUrl(
       dto.inventoryNumber,
     );
+
+    const invNumber = await this.invModel
+      .findOne({
+        inventoryNumber: dto.inventoryNumber,
+      })
+      .exec();
+
+    if (invNumber)
+      throw new ConflictException('Inventory Number already exists');
 
     let assignedTo: Types.ObjectId | undefined;
     let assignedToModel: 'User' | 'Employee' | undefined;
