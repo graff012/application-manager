@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsMongoId, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsMongoId, IsNotEmpty, IsOptional, IsString, IsArray } from 'class-validator';
 
 export class CreateApplicationDto {
   @ApiProperty()
@@ -43,4 +43,10 @@ export class CreateApplicationDto {
   })
   @IsOptional()
   images?: any[];
+
+  @ApiProperty({ required: false, type: [String], description: 'Uploaded file IDs.' })
+  @IsOptional()
+  @IsArray()
+  @IsMongoId({ each: true })
+  fileIds?: string[];
 }

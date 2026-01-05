@@ -9,6 +9,11 @@ import {
 
 // DTO for regular users updating their own profile
 export class UpdateProfileDto {
+  @ApiPropertyOptional({ example: 'John Doe' })
+  @IsOptional()
+  @IsString()
+  fullName?: string;
+
   @ApiProperty({ required: false, example: '+998901234567' })
   @IsOptional()
   @IsString()
@@ -21,6 +26,11 @@ export class UpdateProfileDto {
   @IsOptional()
   @IsEnum(['male', 'female', 'other'])
   gender?: string;
+
+  @ApiPropertyOptional({ enum: ['active', 'blocked'] })
+  @IsOptional()
+  @IsEnum(['active', 'blocked'])
+  status?: 'active' | 'blocked';
 }
 
 // DTO for admins updating any user

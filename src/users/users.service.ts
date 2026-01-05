@@ -109,8 +109,10 @@ export class UsersService {
     const user = await this.userModel.findById(userId).exec();
     if (!user) throw new NotFoundException('User not found');
 
+    if (dto.fullName) user.fullName = dto.fullName;
     if (dto.phone) user.phone = dto.phone;
     if (dto.gender) user.gender = dto.gender;
+    if (dto.status) user.status = dto.status;
 
     // Mark profile as complete if both phone and gender are provided
     if (user.phone && user.gender) {

@@ -17,6 +17,9 @@ export class Inventory {
   @Prop({ type: [String], default: [] })
   images: string[];
 
+  @Prop({ type: [{ type: Types.ObjectId, ref: 'UploadedFile' }], default: [] })
+  fileIds?: Types.ObjectId[];
+
   @Prop({ type: Types.ObjectId, refPath: 'assignedToModel' })
   assignedTo?: Types.ObjectId;
 

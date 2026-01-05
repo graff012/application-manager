@@ -1,5 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsArray, IsEnum, IsMongoId, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import {
+  IsArray,
+  IsEnum,
+  IsMongoId,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 export class CreateInventoryDto {
   @ApiProperty({ example: 'Canon mf3010' })
@@ -17,7 +24,10 @@ export class CreateInventoryDto {
   @IsString()
   serial?: string;
 
-  @ApiProperty({ required: false, enum: ['active', 'repair', 'broken', 'inactive'] })
+  @ApiProperty({
+    required: false,
+    enum: ['active', 'repair', 'broken', 'inactive'],
+  })
   @IsOptional()
   @IsEnum(['active', 'repair', 'broken', 'inactive'])
   status?: string;
@@ -48,4 +58,14 @@ export class CreateInventoryDto {
   @IsArray()
   @IsMongoId({ each: true })
   tools?: string[];
+
+  @ApiProperty({
+    required: false,
+    type: [String],
+    description: 'Uploaded file IDs.',
+  })
+  @IsOptional()
+  @IsArray()
+  @IsMongoId({ each: true })
+  fileIds?: string[];
 }
