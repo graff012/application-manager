@@ -16,6 +16,7 @@ import { InventoryModule } from './inventory/inventory.module';
 import { DatabaseModule } from './database/database.module';
 import { TagsModule } from './tags/tags.module';
 import { ToolsModule } from './tools/tools.module';
+import { FilesModule } from './files/files.module';
 
 @Module({
   imports: [
@@ -44,6 +45,7 @@ import { ToolsModule } from './tools/tools.module';
     AuthModule,
     TagsModule,
     ToolsModule,
+    FilesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

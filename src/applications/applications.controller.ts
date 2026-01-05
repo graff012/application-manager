@@ -43,7 +43,7 @@ export class ApplicationsController {
     return this.applicationsService.findAll(filter);
   }
 
-  @Get('by-id/:id')
+  @Get(':id')
   @RequirePermission('applications', 'read')
   findOne(@Param('id') id: string) {
     return this.applicationsService.findOne(id);
