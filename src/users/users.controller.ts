@@ -66,6 +66,19 @@ export class UsersController {
     return this.usersService.findById(id);
   }
 
+  @Get('me/inventory-history')
+  getMyInventoryHistory(@Request() req) {
+    return this.usersService.getInventoryHistory(req.user.userId);
+  }
+
+  @Get(':id/inventory-history')
+  getInventoryHistory(@Param('id') id: string, @Request() req) {
+if (req.user.role !== 'admin' && req.user.userId !== id) {
+      throw new ForbiddenException('Access denied');
+    }
+    return this.usersService.getInventoryHistory(id);
+  }
+
   // Admin update endpoint
   @Patch(':id')
   @Roles('admin')

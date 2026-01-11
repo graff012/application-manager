@@ -79,6 +79,21 @@ export class UsersService {
     return this.userModel.findOne({ tableNumber, jshshir }).exec();
   }
 
+  async getInventoryHistory(userId: string) {
+    if (!userId) {
+      throw new BadRequestException('User ID is required');
+    }
+    if (!isValidObjectId(userId)) {
+      throw new BadRequestException('Invalid user ID format');
+    }
+    const user = await this.userModel
+      .findById(userId)
+      .populate('inventoryHistory.inventory')
+      .exec();
+    if (!user) throw new NotFoundException('User not found');
+    return user.inventoryHistory;
+  }
+
   async findById(id: string) {
     if (!id) {
       throw new BadRequestException('User ID is required');
