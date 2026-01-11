@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Delete,
+  ForbiddenException,
   Get,
   Param,
   Patch,
@@ -50,6 +51,11 @@ export class UsersController {
     return this.usersService.findById(req.user.userId);
   }
 
+  @Get('me/inventory-history')
+  getMyInventoryHistory(@Request() req) {
+    return this.usersService.getInventoryHistory(req.user.userId);
+  }
+
   // User self-update endpoint (must come before :id route)
   @Patch('me')
   updateProfile(@Request() req, @Body() dto: UpdateProfileDto) {
@@ -61,22 +67,17 @@ export class UsersController {
     return this.usersService.findByTableNumber(tableNumber);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.usersService.findById(id);
-  }
-
-  @Get('me/inventory-history')
-  getMyInventoryHistory(@Request() req) {
-    return this.usersService.getInventoryHistory(req.user.userId);
-  }
-
   @Get(':id/inventory-history')
   getInventoryHistory(@Param('id') id: string, @Request() req) {
-if (req.user.role !== 'admin' && req.user.userId !== id) {
+    if (req.user.role !== 'admin' && req.user.userId !== id) {
       throw new ForbiddenException('Access denied');
     }
     return this.usersService.getInventoryHistory(id);
+  }
+
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.usersService.findById(id);
   }
 
   // Admin update endpoint
