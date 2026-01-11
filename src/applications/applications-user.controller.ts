@@ -12,7 +12,7 @@ import { Roles } from '../auth/decorators/roles.decorator';
 export class ApplicationsUserController {
   constructor(private readonly applicationsService: ApplicationsService) {}
 
-  @Get('my')
+  @Get('user/my')
   @Roles('user')
   async getMyApplications(@Request() req) {
     const userId = req.user.userId;

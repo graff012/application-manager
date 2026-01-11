@@ -60,7 +60,11 @@ export class Application {
       {
         status: { type: String, required: true },
         changedBy: { type: Types.ObjectId, refPath: 'history.changedByModel' },
-        changedByModel: { type: String, enum: ['User', 'Employee'], required: true },
+        changedByModel: {
+          type: String,
+          enum: ['User', 'Employee'],
+          required: true,
+        },
         changedAt: { type: Date, default: () => new Date() },
         comment: { type: String },
       },
