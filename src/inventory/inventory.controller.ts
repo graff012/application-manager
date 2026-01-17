@@ -62,6 +62,12 @@ export class InventoryController {
     return this.inventoryService.findAll();
   }
 
+  @Get(':id/repair-history')
+  @RequirePermission('inventories', 'read')
+  getRepairHistory(@Param('id') id: string) {
+    return this.inventoryService.getRepairHistory(id);
+  }
+
   @Get(':id')
   @RequirePermission('invetories', 'read')
   findOne(@Param('id') id: string) {

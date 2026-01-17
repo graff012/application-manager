@@ -47,6 +47,12 @@ export class Inventory {
   @Prop()
   qrCodeUrl: string;
 
+  @Prop()
+  buyReason?: string;
+
+  @Prop()
+  takenTime?: Date;
+
   @Prop({
     type: [
       {

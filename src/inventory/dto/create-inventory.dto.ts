@@ -1,6 +1,7 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsArray,
+  IsDateString,
   IsEnum,
   IsMongoId,
   IsNotEmpty,
@@ -68,4 +69,18 @@ export class CreateInventoryDto {
   @IsArray()
   @IsMongoId({ each: true })
   fileIds?: string[];
+
+  @ApiPropertyOptional({ description: 'Reason for purchasing inventory' })
+  @IsOptional()
+  @IsString()
+  buyReason?: string;
+
+  @ApiPropertyOptional({
+    description: 'Timestamp when the inventory was taken',
+    type: String,
+    format: 'date-time',
+  })
+  @IsOptional()
+  @IsDateString()
+  takenTime?: string;
 }

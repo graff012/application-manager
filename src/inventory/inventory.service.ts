@@ -112,6 +112,20 @@ export class InventoryService {
     );
   }
 
+  async getRepairHistory(id: string) {
+    const doc = await this.invModel
+      .findById(id)
+      .select('history')
+      .populate({
+        path: 'history.by',
+        select: 'fullName',
+      })
+      .exec();
+
+    if (!doc) throw new NotFoundException('Inventory not found');
+    return doc.history.filter((entry) => entry.action === 'repair');
+  }
+
   async findOne(id: string) {
     const doc = await this.invModel
       .findById(id)
