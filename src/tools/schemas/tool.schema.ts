@@ -20,7 +20,7 @@ export class Tool {
   @Prop({ type: Number, default: 0, min: 0 })
   writtenOff: number;
 
-  @Prop({ type: [Types.ObjectId], ref: 'tags', required: true })
+  @Prop({ type: [Types.ObjectId], ref: 'Tag', required: true })
   tags: Types.ObjectId[];
 }
 
