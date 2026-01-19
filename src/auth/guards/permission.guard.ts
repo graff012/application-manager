@@ -42,6 +42,8 @@ export class PermissionGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
     const user = request.user;
 
+    console.log('this is the permission user: ', user);
+
     // console.log('user: ', user);
 
     if (!user) throw new ForbiddenException('User not authenticated');
@@ -53,7 +55,10 @@ export class PermissionGuard implements CanActivate {
     // check employee permission
     const { resource, action } = requiredPermission;
 
-    if (user.role === 'user' && resource === 'application' && action === 'create') {
+    console.log('this is the recourse and action', resource, action);
+
+    const isUser = user.role === 'user' || Boolean(user.tableNumber);
+    if (isUser && resource === 'applications' && action === 'create') {
       return true;
     }
 

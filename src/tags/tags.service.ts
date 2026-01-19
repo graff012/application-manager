@@ -19,15 +19,16 @@ export class TagsService {
       return await this.tagModel.create(dto);
     } catch (err) {
       if (err?.code === 11000) {
-        if (err?.keyPattern?.name) {
+        const keyPattern = err?.keyPattern ?? err?.keyValue ?? {};
+        if (Object.prototype.hasOwnProperty.call(keyPattern, 'name')) {
           throw new ConflictException('Tag name already exists');
         }
-        if (err?.keyPattern?.type) {
+        if (Object.prototype.hasOwnProperty.call(keyPattern, 'type')) {
           throw new ConflictException('Tag type already exists');
         }
         throw new ConflictException('Tag already exists');
       }
-      }
+      throw err;
     }
   }
 
@@ -58,7 +59,7 @@ export class TagsService {
   async findAllWithToolCount() {
     const tags = await this.tagModel.find().exec();
     const toolCounts = await this.connection.collection('tools').aggregate([
-      { $group: { _id: '$tagId', count: { $sum: 1 } } }
+      { $group: { _id: '$tagId', count: { $sum: 1 } }
     ]).toArray();
 
     return tags.map(tag => ({
