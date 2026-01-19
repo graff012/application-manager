@@ -52,6 +52,11 @@ export class PermissionGuard implements CanActivate {
 
     // check employee permission
     const { resource, action } = requiredPermission;
+
+    if (user.role === 'user' && resource === 'application' && action === 'create') {
+      return true;
+    }
+
     const hasPermission = user.permissions?.[resource]?.[action] === true;
 
     if (!hasPermission) {
