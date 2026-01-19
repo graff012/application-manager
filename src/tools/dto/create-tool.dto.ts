@@ -3,6 +3,7 @@ import { Type } from 'class-transformer';
 import {
   IsNotEmpty,
   IsNumber,
+  IsArray,
   IsOptional,
   IsString,
   IsMongoId,
@@ -29,9 +30,9 @@ export class CreateToolDto {
   @IsNumber()
   quantity: number;
 
-  @ApiProperty({ required: true, example: '12345678923456' })
-  @IsString()
+  @ApiProperty({ required: true, type: [String], example: ['12345678923456'] })
+  @IsArray()
   @IsNotEmpty()
-  @IsMongoId()
-  tagId: string;
+  @IsMongoId({ each: true })
+  tags: string[];
 }

@@ -20,8 +20,8 @@ export class Tool {
   @Prop({ type: Number, default: 0, min: 0 })
   writtenOff: number;
 
-  @Prop({ type: Types.ObjectId, ref: 'tags', required: true })
-  tagId: Types.ObjectId;
+  @Prop({ type: [Types.ObjectId], ref: 'tags', required: true })
+  tags: Types.ObjectId[];
 }
 
 export const ToolSchema = SchemaFactory.createForClass(Tool);

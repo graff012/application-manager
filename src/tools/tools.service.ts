@@ -18,12 +18,12 @@ export class ToolsService {
   async create(dto: CreateToolDto) {
     if (
       !dto.name ||
-      !dto.tagId ||
+      !dto.tags?.length ||
       dto.quantity === undefined ||
       !dto.toolNumber
     ) {
       throw new BadRequestException(
-        'name, tagId, quantity, toolNumber are required',
+        'name, tags, quantity, toolNumber are required',
       );
     }
 
@@ -45,13 +45,13 @@ export class ToolsService {
   }
 
   findAll() {
-    return this.toolModel.find().populate('tagId').exec();
+    return this.toolModel.find().populate('tags').exec();
   }
 
   async findOne(id: string) {
     const tool = await this.toolModel
       .findOne({ _id: id })
-      .populate('tagId')
+      .populate('tags')
       .exec();
     if (!tool) throw new NotFoundException('Tool not found');
     return tool;
@@ -78,7 +78,7 @@ export class ToolsService {
 
   // the number of tool, but count by tag
   async countByTag(tagId: string) {
-    const tools = await this.toolModel.find({tagId}).exec();
+    const tools = await this.toolModel.find({ tags: tagId }).exec();
 
     return tools.map((t) => ({
       toolId: t._id,
@@ -92,7 +92,7 @@ export class ToolsService {
   async update(id: string, dto: UpdateToolDto) {
     const tool = await this.toolModel
       .findOneAndUpdate({ _id: id }, dto, { new: true })
-      .populate('tagId')
+      .populate('tags')
       .exec();
     if (!tool) throw new NotFoundException('Tool not found');
     return tool;
@@ -105,6 +105,6 @@ export class ToolsService {
   }
 
   async findByTag(tagId: string) {
-    return this.toolModel.find({ tagId }).populate('tagId').exec();
+    return this.toolModel.find({ tags: tagId }).populate('tags').exec();
   }
 }

@@ -58,23 +58,30 @@ export class TagsService {
 
   async findAllWithToolCount() {
     const tags = await this.tagModel.find().exec();
-    const toolCounts = await this.connection.collection('tools').aggregate([
-      { $group: { _id: '$tagId', count: { $sum: 1 } }
+
+    const toolCounts = await this.connection
+      .collection('tools')
+      .aggregate([
+        { $group: { _id: '$tagId', count: { $sum: 1 } } },
     ]).toArray();
 
-    return tags.map(tag => ({
+    return tags.map((tag) => ({
       ...tag.toObject(),
-      toolCount: toolCounts.find(tc => tc._id.toString() === tag._id.toString())?.count || 0
+      toolCount:
+        toolCounts.find((tc) => tc._id.toString() === tag._id.toString())
+          ?.count || 0,
     }));
   }
 
   async findOneWithToolCount(id: string) {
     const tag = await this.findOne(id);
-    const toolCount = await this.connection.collection('tools').countDocuments({ tagId: tag._id });
-    
+    const toolCount = await this.connection
+      .collection('tools')
+      .countDocuments({ tagId: tag._id });
+
     return {
       ...tag.toObject(),
-      toolCount
+      toolCount,
     };
   }
 }
