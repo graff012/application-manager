@@ -19,7 +19,14 @@ export class TagsService {
       return await this.tagModel.create(dto);
     } catch (err) {
       if (err?.code === 11000) {
-        throw new ConflictException('Tag type already exists');
+        if (err?.keyPattern?.name) {
+          throw new ConflictException('Tag name already exists');
+        }
+        if (err?.keyPattern?.type) {
+          throw new ConflictException('Tag type already exists');
+        }
+        throw new ConflictException('Tag already exists');
+      }
       }
     }
   }
