@@ -1,17 +1,16 @@
-
 import {
   Controller,
   Get,
   Param,
   Post,
   Res,
-  UploadedFile,
+  UploadedFiles,
   UseGuards,
   UseInterceptors,
-  NotFoundException,
+  BadRequestException,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { FilesService } from './files.service';
 import type { Multer } from 'multer';
@@ -27,10 +26,24 @@ export class FilesController {
   @ApiBearerAuth()
   @ApiConsumes('multipart/form-data')
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(FileInterceptor('file'))
-  async upload(@UploadedFile() file?: Multer.File) {
+  @UseInterceptors(
+    FileFieldsInterceptor([
+      { name: 'file', maxCount: 1 },
+      { name: 'files', maxCount: 1 },
+    ]),
+  )
+  async upload(
+    @UploadedFiles()
+    files?: {
+      file?: Multer.File[];
+      files?: Multer.File[];
+    },
+  ) {
+    const file = files?.file?.[0] ?? files?.files?.[0];
     if (!file?.path) {
-      throw new NotFoundException('File not provided');
+      throw new BadRequestException(
+        'File not provided. Use multipart/form-data with a "file" field.',
+      );
     }
 
     const relativePath = this.toUploadsRelativePath(file.path);

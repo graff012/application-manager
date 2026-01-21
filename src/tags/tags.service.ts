@@ -1,4 +1,9 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+  OnModuleInit,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Tag, TagDocument } from './schemas/tag.schema';
@@ -8,11 +13,15 @@ import { InjectConnection } from '@nestjs/mongoose';
 import { Connection } from 'mongoose';
 
 @Injectable()
-export class TagsService {
+export class TagsService implements OnModuleInit {
   constructor(
     @InjectModel(Tag.name) private readonly tagModel: Model<TagDocument>,
     @InjectConnection() private readonly connection: Connection,
   ) {}
+
+  async onModuleInit() {
+      await this.tagModel.syncIndexes();
+  }
 
   async create(dto: CreateTagDto) {
     try {
@@ -22,9 +31,6 @@ export class TagsService {
         const keyPattern = err?.keyPattern ?? err?.keyValue ?? {};
         if (Object.prototype.hasOwnProperty.call(keyPattern, 'name')) {
           throw new ConflictException('Tag name already exists');
-        }
-        if (Object.prototype.hasOwnProperty.call(keyPattern, 'type')) {
-          throw new ConflictException('Tag type already exists');
         }
         throw new ConflictException('Tag already exists');
       }
