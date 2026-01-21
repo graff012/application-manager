@@ -42,6 +42,14 @@ export class CreateApplicationDto {
 
   @ApiProperty({
     required: false,
+    description: 'Inventory/device ID associated with this application',
+  })
+  @IsOptional()
+  @IsMongoId()
+  inventory?: string;
+
+  @ApiProperty({
+    required: false,
     type: 'string',
     format: 'binary',
     isArray: true,
