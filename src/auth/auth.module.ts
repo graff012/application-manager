@@ -20,7 +20,7 @@ import { EmployeesModule } from '../employees/employees.module';
       inject: [ConfigService],
       useFactory: async (config: ConfigService) => ({
         secret: config.get<string>('JWT_SECRET'),
-        signOptions: { expiresIn: '7h' },
+        signOptions: { expiresIn: '30d' },
       }),
     }),
   ],
