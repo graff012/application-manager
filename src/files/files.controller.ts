@@ -19,14 +19,14 @@ import type { Response } from 'express';
 import * as path from 'path';
 
 @ApiTags('files')
-@ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
 @Controller('files')
 export class FilesController {
   constructor(private readonly filesService: FilesService) {}
 
   @Post()
+  @ApiBearerAuth()
   @ApiConsumes('multipart/form-data')
+  @UseGuards(JwtAuthGuard)
   @UseInterceptors(FileInterceptor('file'))
   async upload(@UploadedFile() file?: Multer.File) {
     if (!file?.path) {
