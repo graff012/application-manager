@@ -48,15 +48,7 @@ export class ApplicationsService {
         ...dto,
         index,
         images: imageUrls,
-        history: [
-          {
-            status: 'new',
-            changedBy: dto.user,
-            changedByModel: 'User',
-            changedAt: new Date(),
-            comment: 'Ariza yaratildi',
-          },
-        ],
+        history: [],
       });
       const chatId = this.config.get<string>('TELEGRAM_CHAT_ID');
       if (chatId && /^-?\d+$/.test(chatId)) {

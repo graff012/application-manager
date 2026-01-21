@@ -8,7 +8,7 @@ export class Tag {
   @Prop({ required: true, unique: true })
   name: string;
 
-  @Prop({ required: true, unique: true })
+  @Prop({ required: true })
   type: string;
 
   @Prop()
