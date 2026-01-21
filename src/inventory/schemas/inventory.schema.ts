@@ -56,6 +56,20 @@ export class Inventory {
   @Prop({
     type: [
       {
+        key: { type: String, required: true },
+        value: { type: String, required: true },
+      },
+    ],
+    default: [],
+  })
+  additionalParametr?: Array<{
+    key: string;
+    value: string;
+  }>;
+
+  @Prop({
+    type: [
+      {
         action: {
           type: String,
           enum: ['assigned', 'repair', 'returned', 'broken'],

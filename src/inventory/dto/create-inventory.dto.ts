@@ -7,7 +7,22 @@ import {
   IsNotEmpty,
   IsOptional,
   IsString,
+  ValidateNested,
 } from 'class-validator';
+
+import { Type } from 'class-transformer';
+
+export class AdditionalParametrDto {
+  @ApiProperty({ example: 'color' })
+  @IsString()
+  @IsNotEmpty()
+  key: string;
+
+  @ApiProperty({ example: 'black' })
+  @IsString()
+  @IsNotEmpty()
+  value: string;
+}
 
 export class CreateInventoryDto {
   @ApiProperty({ example: 'Canon mf3010' })
@@ -83,4 +98,14 @@ export class CreateInventoryDto {
   @IsOptional()
   @IsDateString()
   takenTime?: string;
+
+  @ApiPropertyOptional({
+    description: 'Additional parameters for the inventory item',
+    type: [AdditionalParametrDto],
+  })
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => AdditionalParametrDto)
+  additionalParametr?: AdditionalParametrDto[];
 }

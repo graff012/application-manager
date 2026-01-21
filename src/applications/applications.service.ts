@@ -57,7 +57,19 @@ export class ApplicationsService {
           `Application ${index} created with issue: ${created.issue}.`,
         );
       }
-      return created;
+      const populated = await this.appModel
+        .findById(created._id)
+        .populate('user')
+        .populate('branch')
+        .populate('department')
+        .populate('assignedTo')
+        .populate('inventory')
+        .populate({
+          path: 'history.changedBy',
+          select: 'fullName',
+        })
+        .exec();
+      return populated ?? created;
     } catch (error) {
       this.handleError(error, 'Failed to create application.');
     }
