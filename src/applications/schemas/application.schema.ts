@@ -59,6 +59,33 @@ export class Application {
   deadline?: Date;
 
   @Prop({
+    type: {
+      workDone: { type: String },
+      usedTools: [
+        {
+          tool: { type: Types.ObjectId, ref: 'Tool' },
+          quantity: { type: Number },
+        },
+      ],
+      otherTools: { type: String },
+      images: [{ type: String }],
+      completedAt: { type: Date },
+      completedBy: { type: Types.ObjectId, ref: 'Employee' },
+    },
+  })
+  completionReport?: {
+    workDone: string;
+    usedTools?: Array<{
+      tool: Types.ObjectId;
+      quantity: number;
+    }>;
+    otherTools?: string;
+    images?: string[];
+    completedAt: Date;
+    completedBy: Types.ObjectId;
+  };
+
+  @Prop({
     type: [
       {
         status: { type: String, required: true },

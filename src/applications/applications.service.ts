@@ -12,6 +12,8 @@ import { CreateApplicationDto } from './dto/create-application.dto';
 import { TelegramService } from '../telegram/telegram.service';
 import { ConfigService } from '@nestjs/config';
 import { EmployeeGateway } from '../employees/employee.gateway';
+import { ToolsService } from '../tools/tools.service';
+import { CompleteApplicationDto } from './dto/complete-application.dto';
 
 @Injectable()
 export class ApplicationsService {
@@ -20,6 +22,7 @@ export class ApplicationsService {
     private readonly telegram: TelegramService,
     private readonly config: ConfigService,
     private readonly employeeGateway: EmployeeGateway,
+    private readonly toolsService: ToolsService,
   ) {}
 
   private async generateIndex(): Promise<string> {
@@ -263,6 +266,130 @@ export class ApplicationsService {
       return app;
     } catch (error) {
       this.handleError(error, 'Failed to update application status.');
+    }
+  }
+
+  async extendDeadline(
+    applicationId: string,
+    newDeadline: Date,
+    reason: string,
+    employeeId: string,
+    employeeName: string,
+  ) {
+    try {
+      const app = await this.appModel.findById(applicationId).exec();
+      if (!app) throw new NotFoundException('Application not found');
+
+      if (app.status !== 'inProgress') {
+        throw new BadRequestException(
+          'Deadline can only be extended when status is inProgress',
+        );
+      }
+
+      const oldDeadline = app.deadline;
+      const employeeObjectId = new Types.ObjectId(employeeId);
+
+      app.deadline = newDeadline;
+      app.history.push({
+        status: app.status,
+        changedBy: employeeObjectId,
+        changedByModel: 'Employee',
+        changedAt: new Date(),
+        comment: `Deadline extended from ${oldDeadline?.toISOString() || 'none'} to ${newDeadline.toISOString()}. Reason: ${reason}`,
+      });
+
+      await app.save();
+
+      // Telegram notification
+      await this.telegram.sendTestNotification(
+        `Application ${app.index} deadline extended by ${employeeName}. Reason: ${reason}`,
+      );
+
+      return app;
+    } catch (error) {
+      this.handleError(error, 'Failed to extend deadline.');
+    }
+  }
+
+  async completeApplication(
+    applicationId: string,
+    dto: CompleteApplicationDto,
+    imageUrls: string[],
+    employeeId: string,
+    employeeName: string,
+  ) {
+    try {
+      const app = await this.appModel.findById(applicationId).exec();
+      if (!app) throw new NotFoundException('Application not found');
+
+      if (app.status !== 'inProgress') {
+        throw new BadRequestException(
+          'Application can only be completed when status is inProgress',
+        );
+      }
+
+      const employeeObjectId = new Types.ObjectId(employeeId);
+
+      // Deduct used tools from inventory
+      if (dto.usedTools && dto.usedTools.length > 0) {
+        for (const usedTool of dto.usedTools) {
+          const tool = await this.toolsService.findOne(usedTool.tool);
+          const available = (tool.quantity ?? 0) - (tool.writtenOff ?? 0);
+
+          if (usedTool.quantity > available) {
+            throw new BadRequestException(
+              `Not enough quantity for tool "${tool.name}". Available: ${available}, Requested: ${usedTool.quantity}`,
+            );
+          }
+
+          // Increase writtenOff count
+          await this.toolsService.update(usedTool.tool, {
+            writtenOff: (tool.writtenOff ?? 0) + usedTool.quantity,
+          });
+        }
+      }
+
+      // Set completion report
+      app.completionReport = {
+        workDone: dto.workDone,
+        usedTools: dto.usedTools?.map((ut) => ({
+          tool: new Types.ObjectId(ut.tool),
+          quantity: ut.quantity,
+        })),
+        otherTools: dto.otherTools,
+        images: imageUrls,
+        completedAt: new Date(),
+        completedBy: employeeObjectId,
+      };
+
+      app.status = 'completed';
+      app.history.push({
+        status: 'completed',
+        changedBy: employeeObjectId,
+        changedByModel: 'Employee',
+        changedAt: new Date(),
+        comment: `Completed. Work done: ${dto.workDone}`,
+      });
+
+      await app.save();
+
+      // WebSocket notification
+      this.employeeGateway.broadcastStatusChanged({
+        applicationId: app._id.toString(),
+        newStatus: 'completed',
+        changedBy: employeeName,
+        timestamp: new Date(),
+        employeeId,
+      });
+
+      // Telegram notification
+      await this.telegram.sendTestNotification(
+        `Application ${app.index} completed by ${employeeName}`,
+      );
+
+      return app;
+    } catch (error) {
+      this.handleError(error, 'Failed to complete application.');
     }
   }
 

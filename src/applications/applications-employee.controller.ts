@@ -2,12 +2,16 @@ import {
   Controller,
   Get,
   Patch,
+  Post,
   Param,
   Body,
   UseGuards,
+  UseInterceptors,
+  UploadedFiles,
   Request,
 } from '@nestjs/common';
-import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags, ApiBearerAuth, ApiConsumes } from '@nestjs/swagger';
+import { FilesInterceptor } from '@nestjs/platform-express';
 import { ApplicationsService } from './applications.service';
 import { EmployeesService } from '../employees/employees.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -15,6 +19,8 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { UpdateStatusDto } from './dto/update-status.dto';
 import { AssignApplicationDto } from './dto/assign-application.dto';
+import { ExtendDeadlineDto } from './dto/extend-deadline.dto';
+import { CompleteApplicationDto } from './dto/complete-application.dto';
 
 @ApiTags('applications-employee')
 @Controller('applications')
@@ -69,5 +75,64 @@ export class ApplicationsEmployeeController {
       employee.fullName,
       dto.comment,
     );
+  }
+
+  @Patch(':id/deadline')
+  @Roles('employee', 'admin')
+  async extendDeadline(
+    @Param('id') id: string,
+    @Body() dto: ExtendDeadlineDto,
+    @Request() req,
+  ) {
+    const employeeId = req.user.userId;
+    const employee = await this.employeesService.findOne(employeeId);
+    return this.applicationsService.extendDeadline(
+      id,
+      new Date(dto.newDeadline),
+      dto.reason,
+      employeeId,
+      employee.fullName,
+    );
+  }
+
+  @Post(':id/complete')
+  @Roles('employee', 'admin')
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FilesInterceptor('images', 10))
+  async completeApplication(
+    @Param('id') id: string,
+    @Body() dto: CompleteApplicationDto,
+    @UploadedFiles() files: any[],
+    @Request() req,
+  ) {
+    const employeeId = req.user.userId;
+    const employee = await this.employeesService.findOne(employeeId);
+
+    const imageUrls = (files || [])
+      .map((f: any) => this.toUploadsUrlPath(f?.path))
+      .filter(Boolean);
+
+    return this.applicationsService.completeApplication(
+      id,
+      dto,
+      imageUrls,
+      employeeId,
+      employee.fullName,
+    );
+  }
+
+  private toUploadsUrlPath(filePath?: string): string {
+    if (!filePath) return '';
+
+    const normalized = String(filePath)
+      .replace(/\\/g, '/')
+      .replace(/^(\.\.\/)+/g, '')
+      .replace(/^\.?\//g, '');
+
+    const uploadsIndex = normalized.indexOf('uploads/');
+    const relativePath =
+      uploadsIndex >= 0 ? normalized.slice(uploadsIndex) : normalized;
+
+    return `/${relativePath}`;
   }
 }

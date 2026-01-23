@@ -9,6 +9,7 @@ import { ApplicationsUserController } from './applications-user.controller';
 import { Application, ApplicationSchema } from './schemas/application.schema';
 import { TelegramModule } from '../telegram/telegram.module';
 import { EmployeesModule } from '../employees/employees.module';
+import { ToolsModule } from '../tools/tools.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { EmployeesModule } from '../employees/employees.module';
     ]),
     TelegramModule,
     EmployeesModule,
+    ToolsModule,
     ConfigModule,
     MulterModule.register({
       storage: require('multer').diskStorage({
