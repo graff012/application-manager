@@ -44,8 +44,21 @@ export class ToolsService {
     return this.toolModel.create(dto);
   }
 
-  findAll() {
-    return this.toolModel.find().populate('tags').exec();
+  findAll(filter: { status?: string; search?: string } = {}) {
+    const query: any = {};
+
+    if (filter.status) {
+      query.status = filter.status;
+    }
+
+    if (filter.search) {
+      query.$or = [
+        { name: { $regex: filter.search, $options: 'i' } },
+        { toolNumber: { $regex: filter.search, $options: 'i' } },
+      ];
+    }
+
+    return this.toolModel.find(query).populate('tags').exec();
   }
 
   async findOne(id: string) {

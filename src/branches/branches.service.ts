@@ -19,8 +19,18 @@ export class BranchesService {
     return this.branchModel.create(dto);
   }
 
-  findAll() {
-    return this.branchModel.find().exec();
+  findAll(filter: { status?: string; search?: string } = {}) {
+    const query: any = {};
+
+    if (filter.status) {
+      query.status = filter.status;
+    }
+
+    if (filter.search) {
+      query.name = { $regex: filter.search, $options: 'i' };
+    }
+
+    return this.branchModel.find(query).exec();
   }
 
   findOne(id: string) {

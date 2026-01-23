@@ -95,10 +95,27 @@ export class InventoryService {
     return created;
   }
 
-  findAll() {
+  findAll(filter: { status?: string; branch?: string; search?: string } = {}) {
+    const query: any = {};
+
+    if (filter.status) {
+      query.status = filter.status;
+    }
+
+    if (filter.branch) {
+      query.branch = filter.branch;
+    }
+
+    if (filter.search) {
+      query.$or = [
+        { name: { $regex: filter.search, $options: 'i' } },
+        { inventoryNumber: { $regex: filter.search, $options: 'i' } },
+      ];
+    }
+
     return (
       this.invModel
-        .find()
+        .find(query)
         .populate('assignedTo')
         .populate('branch')
         .populate('department')

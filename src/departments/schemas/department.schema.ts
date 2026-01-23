@@ -12,6 +12,9 @@ export class Department {
 
   @Prop({ type: Types.ObjectId, ref: 'Branch', required: true })
   branch: Types.ObjectId;
+
+  @Prop({ enum: ['active', 'inactive'], default: 'active' })
+  status: string;
 }
 
 export const DepartmentSchema = SchemaFactory.createForClass(Department);

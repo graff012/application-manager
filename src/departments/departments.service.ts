@@ -16,9 +16,23 @@ export class DepartmentsService {
     }
   }
 
-  async findAll() {
+  async findAll(filter: { status?: string; branch?: string; search?: string } = {}) {
     try {
-      return await this.deptModel.find().populate('branch').exec();
+      const query: any = {};
+
+      if (filter.status) {
+        query.status = filter.status;
+      }
+
+      if (filter.branch) {
+        query.branch = filter.branch;
+      }
+
+      if (filter.search) {
+        query.name = { $regex: filter.search, $options: 'i' };
+      }
+
+      return await this.deptModel.find(query).populate('branch').exec();
     } catch (error) {
       throw new InternalServerErrorException('Failed to fetch departments');
     }

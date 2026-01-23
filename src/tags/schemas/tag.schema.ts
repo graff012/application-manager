@@ -13,6 +13,9 @@ export class Tag {
 
   @Prop()
   image?: string;
+
+  @Prop({ enum: ['active', 'inactive'], default: 'active' })
+  status: string;
 }
 
 export const TagSchema = SchemaFactory.createForClass(Tag);

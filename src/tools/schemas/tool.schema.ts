@@ -22,6 +22,9 @@ export class Tool {
 
   @Prop({ type: [Types.ObjectId], ref: 'Tag', required: true })
   tags: Types.ObjectId[];
+
+  @Prop({ enum: ['active', 'inactive'], default: 'active' })
+  status: string;
 }
 
 export const ToolSchema = SchemaFactory.createForClass(Tool);
