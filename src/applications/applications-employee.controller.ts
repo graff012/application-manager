@@ -14,6 +14,7 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { UpdateStatusDto } from './dto/update-status.dto';
+import { AssignApplicationDto } from './dto/assign-application.dto';
 
 @ApiTags('applications-employee')
 @Controller('applications')
@@ -35,7 +36,11 @@ export class ApplicationsEmployeeController {
 
   @Patch(':id/assign')
   @Roles('employee', 'admin')
-  async assignToSelf(@Param('id') id: string, @Request() req) {
+  async assignToSelf(
+    @Param('id') id: string,
+    @Body() dto: AssignApplicationDto,
+    @Request() req,
+  ) {
     const employeeId = req.user.userId;
     const employee = await this.employeesService.findOne(employeeId);
 
@@ -44,6 +49,7 @@ export class ApplicationsEmployeeController {
       id,
       employeeId,
       employee.fullName,
+      new Date(dto.deadline),
     );
   }
 

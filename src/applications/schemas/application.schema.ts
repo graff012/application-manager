@@ -55,6 +55,9 @@ export class Application {
   @Prop({ type: Types.ObjectId, ref: 'Employee' })
   assignedTo: Types.ObjectId;
 
+  @Prop({ type: Date })
+  deadline?: Date;
+
   @Prop({
     type: [
       {

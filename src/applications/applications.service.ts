@@ -179,6 +179,7 @@ export class ApplicationsService {
     applicationId: string,
     employeeId: string,
     employeeName: string,
+    deadline: Date,
   ) {
     try {
       const app = await this.appModel.findById(applicationId).exec();
@@ -187,12 +188,13 @@ export class ApplicationsService {
       const employeeObjectId = new Types.ObjectId(employeeId);
       app.assignedTo = employeeObjectId;
       app.status = 'accepted';
+      app.deadline = deadline;
       app.history.push({
         status: 'accepted',
         changedBy: employeeObjectId,
         changedByModel: 'Employee',
         changedAt: new Date(),
-        comment: `Assigned to ${employeeName}`,
+        comment: `Assigned to ${employeeName}, deadline: ${deadline.toISOString()}`,
       });
 
       await app.save();

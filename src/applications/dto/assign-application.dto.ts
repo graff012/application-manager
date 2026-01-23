@@ -1,9 +1,9 @@
-import { IsMongoId, IsNotEmpty } from 'class-validator';
+import { IsDateString, IsNotEmpty } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class AssignApplicationDto {
-  @ApiProperty()
-  @IsMongoId()
+  @ApiProperty({ description: 'Deadline for completing the application' })
+  @IsDateString()
   @IsNotEmpty()
-  employeeId: string;
+  deadline: string;
 }
