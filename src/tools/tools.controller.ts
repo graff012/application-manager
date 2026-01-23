@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -32,8 +33,11 @@ export class ToolsController {
 
   @Get()
   @RequirePermission('tools', 'read')
-  findAll() {
-    return this.toolsService.findAll();
+  findAll(
+    @Query('status') status?: string,
+    @Query('search') search?: string,
+  ) {
+    return this.toolsService.findAll({ status, search });
   }
 
   @Get(':id')

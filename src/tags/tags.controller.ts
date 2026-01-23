@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -36,8 +37,11 @@ export class TagsController {
   }
 
   @Get()
-  findAll() {
-    return this.tagsService.findAll();
+  findAll(
+    @Query('status') status?: string,
+    @Query('search') search?: string,
+  ) {
+    return this.tagsService.findAll({ status, search });
   }
 
   @Get('with-count')

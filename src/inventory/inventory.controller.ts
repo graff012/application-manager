@@ -5,6 +5,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   Request,
   Res,
   UploadedFiles,
@@ -58,8 +59,12 @@ export class InventoryController {
 
   @Get()
   @RequirePermission('invetories', 'read')
-  findAll() {
-    return this.inventoryService.findAll();
+  findAll(
+    @Query('status') status?: string,
+    @Query('branch') branch?: string,
+    @Query('search') search?: string,
+  ) {
+    return this.inventoryService.findAll({ status, branch, search });
   }
 
   @Get(':id/repair-history')

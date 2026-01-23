@@ -6,6 +6,7 @@ import {
   Patch,
   Delete,
   Param,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
@@ -32,8 +33,11 @@ export class BranchesController {
 
   @Get()
   @RequirePermission('branches', 'read')
-  findAll() {
-    return this.branchesService.findAll();
+  findAll(
+    @Query('status') status?: string,
+    @Query('search') search?: string,
+  ) {
+    return this.branchesService.findAll({ status, search });
   }
 
   @Get(':id')
