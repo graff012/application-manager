@@ -39,10 +39,31 @@ export class UsersService {
     return user;
   }
 
-  async findAll() {
+  async findAll(filter: {
+    status?: string;
+    branch?: string;
+    search?: string;
+  } = {}) {
     try {
+      const query: any = {};
+
+      if (filter.status) {
+        query.status = filter.status;
+      }
+
+      if (filter.branch) {
+        query.branch = filter.branch;
+      }
+
+      if (filter.search) {
+        query.$or = [
+          { fullName: { $regex: filter.search, $options: 'i' } },
+          { tableNumber: { $regex: filter.search, $options: 'i' } },
+        ];
+      }
+
       const users = await this.userModel
-        .find()
+        .find(query)
         .populate('branch')
         .populate('department')
         .exec();

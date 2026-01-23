@@ -50,17 +50,38 @@ export class EmployeesService {
     return this.employeeModel.create({ ...dto, password: hashedPassword });
   }
 
-  async findAll() {
+  async findAll(filter: {
+    status?: string;
+    branch?: string;
+    search?: string;
+  } = {}) {
     try {
+      const query: any = {};
+
+      if (filter.status) {
+        query.status = filter.status;
+      }
+
+      if (filter.branch) {
+        query.branch = filter.branch;
+      }
+
+      if (filter.search) {
+        query.$or = [
+          { fullName: { $regex: filter.search, $options: 'i' } },
+          { email: { $regex: filter.search, $options: 'i' } },
+        ];
+      }
+
       return await this.employeeModel
-        .find()
+        .find(query)
         .populate('branch')
         .populate('department')
         .populate('assignedApplications')
         .select('+permissions')
         .exec();
     } catch (error) {
-      console.error('Error occured while creating employee', error);
+      console.error('Error occured while fetching employees', error);
       throw new InternalServerErrorException('Failed to fetch employees');
     }
   }

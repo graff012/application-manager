@@ -7,6 +7,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   Request,
   UseGuards,
 } from '@nestjs/common';
@@ -31,8 +32,12 @@ export class UsersController {
   }
 
   @Get()
-  findAll() {
-    return this.usersService.findAll();
+  findAll(
+    @Query('status') status?: string,
+    @Query('branch') branch?: string,
+    @Query('search') search?: string,
+  ) {
+    return this.usersService.findAll({ status, branch, search });
   }
 
   @Get('count')

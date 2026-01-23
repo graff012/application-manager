@@ -6,6 +6,7 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
@@ -30,8 +31,12 @@ export class EmployeesController {
   }
 
   @Get()
-  findAll() {
-    return this.employeesService.findAll();
+  findAll(
+    @Query('status') status?: string,
+    @Query('branch') branch?: string,
+    @Query('search') search?: string,
+  ) {
+    return this.employeesService.findAll({ status, branch, search });
   }
 
   @Get('count')
