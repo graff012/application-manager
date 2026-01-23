@@ -41,8 +41,13 @@ export class ApplicationsController {
 
   @Get()
   @RequirePermission('applications', 'read')
-  findAll(@Query('user') user?: string) {
-    const filter = user ? { user } : {};
+  findAll(
+    @Query('user') user?: string,
+    @Query('status') status?: string,
+  ) {
+    const filter: any = {};
+    if (user) filter.user = user;
+    if (status) filter.status = status;
     return this.applicationsService.findAll(filter);
   }
 
