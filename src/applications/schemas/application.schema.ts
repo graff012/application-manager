@@ -5,8 +5,8 @@ export type ApplicationDocument = HydratedDocument<Application>;
 
 export type ApplicationStatus =
   | 'new'
-  | 'assigned'
-  | 'progressing'
+  | 'accepted'
+  | 'inProgress'
   | 'completed'
   | 'rejected';
 
@@ -17,7 +17,7 @@ export class Application {
 
   @Prop({
     required: true,
-    enum: ['new', 'assigned', 'progressing', 'completed', 'rejected'],
+    enum: ['new', 'accepted', 'inProgress', 'completed', 'rejected'],
     default: 'new',
   })
   status: ApplicationStatus;

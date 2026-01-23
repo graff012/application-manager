@@ -186,9 +186,9 @@ export class ApplicationsService {
 
       const employeeObjectId = new Types.ObjectId(employeeId);
       app.assignedTo = employeeObjectId;
-      app.status = 'assigned';
+      app.status = 'accepted';
       app.history.push({
-        status: 'assigned',
+        status: 'accepted',
         changedBy: employeeObjectId,
         changedByModel: 'Employee',
         changedAt: new Date(),

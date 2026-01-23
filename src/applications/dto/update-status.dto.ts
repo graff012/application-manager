@@ -3,11 +3,11 @@ import { IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class UpdateStatusDto {
   @ApiProperty({
-    enum: ['new', 'assigned', 'progressing', 'completed', 'rejected'],
+    enum: ['new', 'accepted', 'inProgress', 'completed', 'rejected'],
   })
-  @IsEnum(['new', 'assigned', 'progressing', 'completed', 'rejected'])
+  @IsEnum(['new', 'accepted', 'inProgress', 'completed', 'rejected'])
   @IsNotEmpty()
-  status: 'new' | 'assigned' | 'progressing' | 'completed' | 'rejected';
+  status: 'new' | 'accepted' | 'inProgress' | 'completed' | 'rejected';
 
   @ApiProperty({
     required: false,
