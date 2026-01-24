@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, HttpException, HttpStatus } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
 import { AdminsService } from '../admins/admins.service';
@@ -46,7 +46,7 @@ export class AuthService {
     if (admin) {
       const isPasswordValid = await bcrypt.compare(password, admin.password);
       if (!isPasswordValid)
-        throw new UnauthorizedException('Email or password is incorrect');
+        throw new HttpException('wrong password', HttpStatus.CONFLICT);
 
       const payload = {
         userId: admin._id.toString(),
@@ -64,11 +64,11 @@ export class AuthService {
     // If no admin, try employee
     const employee = await this.employeesService.findByEmail(email);
     if (!employee)
-      throw new UnauthorizedException('Email or password is incorrect');
+      throw new HttpException('wrong email', HttpStatus.CONFLICT);
 
     const isPasswordValid = await bcrypt.compare(password, employee.password);
     if (!isPasswordValid)
-      throw new UnauthorizedException('Email or password is incorrect');
+      throw new HttpException('wrong password', HttpStatus.CONFLICT);
 
     const payload = {
       userId: employee._id.toString(),
