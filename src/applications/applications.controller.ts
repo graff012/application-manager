@@ -45,6 +45,8 @@ export class ApplicationsController {
   findAll(
     @Query('user') user?: string,
     @Query('status') status?: string,
+    @Query('limit') limit?: string,
+    @Query('offset') offset?: string,
     @Request() req?,
   ) {
     const filter: any = {};
@@ -56,7 +58,17 @@ export class ApplicationsController {
       filter.assignedTo = req.user.userId;
     }
 
-    return this.applicationsService.findAll(filter);
+    const parsedLimit = Number(limit);
+    const parsedOffset = Number(offset);
+    const pagination = {
+      limit: Number.isFinite(parsedLimit) && parsedLimit > 0 ? parsedLimit : undefined,
+      offset:
+        Number.isFinite(parsedOffset) && parsedOffset >= 0
+          ? parsedOffset
+          : undefined,
+    };
+
+    return this.applicationsService.findAll(filter, pagination);
   }
 
   @Get(':id')

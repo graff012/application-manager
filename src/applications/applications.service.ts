@@ -87,9 +87,9 @@ export class ApplicationsService {
     }
   }
 
-  findAll(filter: any = {}) {
+  findAll(filter: any = {}, pagination?: { limit?: number; offset?: number }) {
     try {
-      return this.appModel
+      const query = this.appModel
         .find(filter)
         .populate('user')
         .populate('branch')
@@ -99,8 +99,17 @@ export class ApplicationsService {
         .populate({
           path: 'history.changedBy',
           select: 'fullName',
-        })
-        .exec();
+        });
+
+      if (pagination?.offset !== undefined) {
+        query.skip(pagination.offset);
+      }
+
+      if (pagination?.limit !== undefined) {
+        query.limit(pagination.limit);
+      }
+
+      return query.exec();
     } catch (error) {
       this.handleError(error, 'Failed to load applications.');
     }
