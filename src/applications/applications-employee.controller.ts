@@ -14,6 +14,7 @@ import { ApiTags, ApiBearerAuth, ApiConsumes } from '@nestjs/swagger';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { ApplicationsService } from './applications.service';
 import { EmployeesService } from '../employees/employees.service';
+import { AdminsService } from '../admins/admins.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -30,6 +31,7 @@ export class ApplicationsEmployeeController {
   constructor(
     private readonly applicationsService: ApplicationsService,
     private readonly employeesService: EmployeesService,
+    private readonly adminsService: AdminsService,
   ) {}
 
   @Get('assigned')
@@ -73,13 +75,21 @@ export class ApplicationsEmployeeController {
     @Body() dto: UpdateStatusDto,
     @Request() req,
   ) {
-    const employeeId = req.user.userId;
-    const employee = await this.employeesService.findOne(employeeId);
+    const actorId = req.user.userId;
+    const actor =
+      req.user.role === 'admin'
+        ? await this.adminsService.findOne(actorId)
+        : await this.employeesService.findOne(actorId);
+    const actorModel = req.user.role === 'admin' ? 'Admin' : 'Employee';
+    const actorName = actor.fullName;
     return this.applicationsService.updateApplicationStatus(
       id,
       dto.status,
-      employeeId,
-      employee.fullName,
+      {
+        id: actorId,
+        name: actorName,
+        model: actorModel,
+      },
       dto.comment,
     );
   }
