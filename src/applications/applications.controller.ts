@@ -61,7 +61,10 @@ export class ApplicationsController {
     const parsedLimit = Number(limit);
     const parsedOffset = Number(offset);
     const pagination = {
-      limit: Number.isFinite(parsedLimit) && parsedLimit > 0 ? parsedLimit : undefined,
+      limit:
+        Number.isFinite(parsedLimit) && parsedLimit > 0
+          ? parsedLimit
+          : undefined,
       offset:
         Number.isFinite(parsedOffset) && parsedOffset >= 0
           ? parsedOffset
@@ -69,6 +72,22 @@ export class ApplicationsController {
     };
 
     return this.applicationsService.findAll(filter, pagination);
+  }
+
+  @Get('status-count')
+  @RequirePermission('applications', 'read')
+  countByStatus(
+    @Query('user') user?: string,
+    @Request() req?,
+  ) {
+    const filter: any = {};
+    if (user) filter.user = user;
+
+    if (req?.user?.role === 'employee') {
+      filter.assignedTo = req.user.userId;
+    }
+
+    return this.applicationsService.countByStatus(filter);
   }
 
   @Get(':id')

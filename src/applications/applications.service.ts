@@ -7,7 +7,11 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
-import { Application, ApplicationDocument } from './schemas/application.schema';
+import {
+  Application,
+  ApplicationDocument,
+  ApplicationStatus,
+} from './schemas/application.schema';
 import { CreateApplicationDto } from './dto/create-application.dto';
 import { TelegramService } from '../telegram/telegram.service';
 import { ConfigService } from '@nestjs/config';
@@ -112,6 +116,35 @@ export class ApplicationsService {
       return query.exec();
     } catch (error) {
       this.handleError(error, 'Failed to load applications.');
+    }
+  }
+
+  async countByStatus(filter: any = {}) {
+    try {
+      const results = await this.appModel
+        .aggregate<{ _id: ApplicationStatus; count: number }>([
+          { $match: filter },
+          { $group: { _id: '$status', count: { $sum: 1 } } },
+        ])
+        .exec();
+
+      const counts: Record<ApplicationStatus, number> = {
+        new: 0,
+        accepted: 0,
+        inProgress: 0,
+        completed: 0,
+        rejected: 0,
+      };
+
+      for (const result of results) {
+        if (result._id in counts) {
+          counts[result._id] = result.count;
+        }
+      }
+
+      return counts;
+    } catch (error) {
+      this.handleError(error, 'Failed to load application status counts.');
     }
   }
 
