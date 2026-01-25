@@ -133,10 +133,13 @@ export class ApplicationsEmployeeController {
       .map((f: any) => this.toUploadsUrlPath(f?.path))
       .filter(Boolean);
 
+    const completionImages =
+      dto.images && dto.images.length > 0 ? dto.images : imageUrls;
+
     return this.applicationsService.completeApplication(
       id,
       dto,
-      imageUrls,
+      completionImages,
       actorId,
       actor.fullName,
       actorModel,

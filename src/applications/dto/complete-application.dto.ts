@@ -46,4 +46,14 @@ export class CompleteApplicationDto {
   @IsOptional()
   @IsString()
   otherTools?: string;
+
+  @ApiProperty({
+    required: false,
+    type: [String],
+    description: 'Uploaded image file IDs.',
+  })
+  @IsOptional()
+  @IsArray()
+  @IsMongoId({ each: true })
+  images?: string[];
 }
