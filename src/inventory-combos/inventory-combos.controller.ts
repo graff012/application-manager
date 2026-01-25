@@ -13,6 +13,7 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
+import type { Multer } from 'multer';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { PermissionGuard } from '../auth/guards/permission.guard';
 import { RequirePermission } from '../auth/decorators/permissions.decorator';
@@ -33,7 +34,7 @@ export class InventoryCombosController {
   @UseInterceptors(FileInterceptor('image'))
   create(
     @Body() dto: CreateInventoryComboDto,
-    @UploadedFile() file?: Express.Multer.File,
+    @UploadedFile() file?: Multer.File,
   ) {
     const imageUrl = file?.path ? this.toUploadsUrlPath(file.path) : undefined;
     return this.combosService.create(dto, imageUrl);
@@ -58,7 +59,7 @@ export class InventoryCombosController {
   update(
     @Param('id') id: string,
     @Body() dto: UpdateInventoryComboDto,
-    @UploadedFile() file?: Express.Multer.File,
+    @UploadedFile() file?: Multer.File,
   ) {
     const imageUrl = file?.path ? this.toUploadsUrlPath(file.path) : undefined;
     return this.combosService.update(id, dto, imageUrl);
