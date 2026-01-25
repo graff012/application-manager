@@ -46,7 +46,7 @@ export class Application {
   @Prop({ type: [{ type: Types.ObjectId, ref: 'UploadedFile' }], default: [] })
   fileIds?: Types.ObjectId[];
 
-  @Prop()
+  @Prop({ default: '' })
   additionalComment: string;
 
   @Prop({ type: Types.ObjectId, ref: 'Inventory' })
