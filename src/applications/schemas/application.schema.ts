@@ -92,7 +92,7 @@ export class Application {
         changedBy: { type: Types.ObjectId, refPath: 'history.changedByModel' },
         changedByModel: {
           type: String,
-          enum: ['User', 'Employee'],
+          enum: ['User', 'Employee', 'Admin'],
           required: true,
         },
         changedAt: { type: Date, default: () => new Date() },

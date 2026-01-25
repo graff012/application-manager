@@ -238,25 +238,50 @@ export class ApplicationsService {
     employeeId: string,
     employeeName: string,
     comment?: string,
+  ): Promise<ApplicationDocument>;
+  async updateApplicationStatus(
+    applicationId: string,
+    newStatus: string,
+    actor: { id: string; name: string; model: 'Employee' | 'Admin' },
+    comment?: string,
+  ): Promise<ApplicationDocument>;
+  async updateApplicationStatus(
+    applicationId: string,
+    newStatus: string,
+    actorOrEmployeeId:
+      | string
+      | { id: string; name: string; model: 'Employee' | 'Admin' },
+    employeeNameOrComment?: string,
+    comment?: string,
   ) {
     try {
+      const actor =
+        typeof actorOrEmployeeId === 'string'
+          ? {
+              id: actorOrEmployeeId,
+              name: employeeNameOrComment ?? 'Unknown',
+              model: 'Employee' as const,
+            }
+          : actorOrEmployeeId;
+      const resolvedComment =
+        typeof actorOrEmployeeId === 'string' ? comment : employeeNameOrComment;
       const app = await this.appModel.findById(applicationId).exec();
       if (!app) throw new NotFoundException('Application not found');
 
-      const trimmedComment = comment?.trim();
+      const trimmedComment = resolvedComment?.trim();
 
       if (newStatus === 'rejected' && !trimmedComment) {
         throw new BadRequestException('Rejection requires a comment (reason).');
       }
 
-      const employeeObjectId = new Types.ObjectId(employeeId);
+      const actorObjectId = new Types.ObjectId(actor.id);
       app.status = newStatus as any;
       app.history.push({
         status: newStatus,
-        changedBy: employeeObjectId,
-        changedByModel: 'Employee',
+        changedBy: actorObjectId,
+        changedByModel: actor.model,
         changedAt: new Date(),
-        comment: trimmedComment || `Status changed by ${employeeName}`,
+        comment: trimmedComment || `Status changed by ${actor.name}`,
       });
 
       await app.save();
@@ -265,14 +290,14 @@ export class ApplicationsService {
       this.employeeGateway.broadcastStatusChanged({
         applicationId: app._id.toString(),
         newStatus,
-        changedBy: employeeName,
+        changedBy: actor.name,
         timestamp: new Date(),
-        employeeId,
+        employeeId: actor.id,
       });
 
       // Telegram notification
       await this.telegram.sendTestNotification(
-        `Application ${app.index} status changed to ${newStatus} by ${employeeName}`,
+        `Application ${app.index} status changed to ${newStatus} by ${actor.name}`,
       );
 
       return app;
