@@ -396,6 +396,7 @@ export class ApplicationsService {
     imageUrls: string[],
     employeeId: string,
     employeeName: string,
+    employeeModel: 'Employee' | 'Admin',
   ) {
     try {
       const app = await this.appModel.findById(applicationId).exec();
@@ -439,13 +440,14 @@ export class ApplicationsService {
         images: imageUrls,
         completedAt: new Date(),
         completedBy: employeeObjectId,
+        completedByModel: employeeModel,
       };
 
       app.status = 'completed';
       app.history.push({
         status: 'completed',
         changedBy: employeeObjectId,
-        changedByModel: 'Employee',
+        changedByModel: employeeModel,
         changedAt: new Date(),
         comment: `Completed. Work done: ${dto.workDone}`,
       });

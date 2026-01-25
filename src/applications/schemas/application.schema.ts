@@ -70,7 +70,15 @@ export class Application {
       otherTools: { type: String },
       images: [{ type: String }],
       completedAt: { type: Date },
-      completedBy: { type: Types.ObjectId, ref: 'Employee' },
+      completedBy: {
+        type: Types.ObjectId,
+        refPath: 'completionReport.completedByModel',
+      },
+      completedByModel: {
+        type: String,
+        enum: ['Employee', 'Admin'],
+        default: 'Employee',
+      },
     },
   })
   completionReport?: {
@@ -83,6 +91,7 @@ export class Application {
     images?: string[];
     completedAt: Date;
     completedBy: Types.ObjectId;
+    completedByModel?: 'Employee' | 'Admin';
   };
 
   @Prop({

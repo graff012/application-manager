@@ -122,8 +122,12 @@ export class ApplicationsEmployeeController {
     @UploadedFiles() files: any[],
     @Request() req,
   ) {
-    const employeeId = req.user.userId;
-    const employee = await this.employeesService.findOne(employeeId);
+    const actorId = req.user.userId;
+    const actor =
+      req.user.role === 'admin'
+        ? await this.adminsService.findOne(actorId)
+        : await this.employeesService.findOne(actorId);
+    const actorModel = req.user.role === 'admin' ? 'Admin' : 'Employee';
 
     const imageUrls = (files || [])
       .map((f: any) => this.toUploadsUrlPath(f?.path))
@@ -133,8 +137,9 @@ export class ApplicationsEmployeeController {
       id,
       dto,
       imageUrls,
-      employeeId,
-      employee.fullName,
+      actorId,
+      actor.fullName,
+      actorModel,
     );
   }
 
