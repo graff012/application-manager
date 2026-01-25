@@ -41,10 +41,7 @@ export class InventoryCombosController {
 
   @Get()
   @RequirePermission('inventories', 'read')
-  findAll(
-    @Query('status') status?: string,
-    @Query('search') search?: string,
-  ) {
+  findAll(@Query('status') status?: string, @Query('search') search?: string) {
     return this.combosService.findAll({ status, search });
   }
 

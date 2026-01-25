@@ -5,6 +5,7 @@ import {
   Param,
   Post,
   Query,
+  Request,
   UploadedFiles,
   UseGuards,
   UseInterceptors,
@@ -44,10 +45,17 @@ export class ApplicationsController {
   findAll(
     @Query('user') user?: string,
     @Query('status') status?: string,
+    @Request() req?,
   ) {
     const filter: any = {};
     if (user) filter.user = user;
     if (status) filter.status = status;
+
+    // Employees only see their assigned applications, admins see all
+    if (req?.user?.role === 'employee') {
+      filter.assignedTo = req.user.userId;
+    }
+
     return this.applicationsService.findAll(filter);
   }
 

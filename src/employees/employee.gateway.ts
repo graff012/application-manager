@@ -46,4 +46,13 @@ export class EmployeeGateway implements OnGatewayConnection, OnGatewayDisconnect
   }) {
     this.server.to(data.employeeId).emit('statusChanged', data);
   }
+
+  broadcastNewApplication(data: {
+    applicationId: string;
+    index: string;
+    issue: string;
+    createdAt: Date;
+  }) {
+    this.server.emit('newApplication', data);
+  }
 }

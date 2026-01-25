@@ -72,6 +72,15 @@ export class ApplicationsService {
           select: 'fullName',
         })
         .exec();
+
+      // WebSocket notification to all employees/admins
+      this.employeeGateway.broadcastNewApplication({
+        applicationId: created._id.toString(),
+        index,
+        issue: created.issue,
+        createdAt: new Date(),
+      });
+
       return populated ?? created;
     } catch (error) {
       this.handleError(error, 'Failed to create application.');
@@ -178,40 +187,43 @@ export class ApplicationsService {
     }
   }
 
-  async assignToEmployee(
+  async assignToEmployees(
     applicationId: string,
-    employeeId: string,
-    employeeName: string,
+    employees: Array<{ id: string; name: string }>,
     deadline: Date,
   ) {
     try {
       const app = await this.appModel.findById(applicationId).exec();
       if (!app) throw new NotFoundException('Application not found');
 
-      const employeeObjectId = new Types.ObjectId(employeeId);
-      app.assignedTo = employeeObjectId;
+      const employeeObjectIds = employees.map((e) => new Types.ObjectId(e.id));
+      const employeeNames = employees.map((e) => e.name).join(', ');
+
+      app.assignedTo = employeeObjectIds;
       app.status = 'accepted';
       app.deadline = deadline;
       app.history.push({
         status: 'accepted',
-        changedBy: employeeObjectId,
+        changedBy: employeeObjectIds[0],
         changedByModel: 'Employee',
         changedAt: new Date(),
-        comment: `Assigned to ${employeeName}, deadline: ${deadline.toISOString()}`,
+        comment: `Assigned to ${employeeNames}, deadline: ${deadline.toISOString()}`,
       });
 
       await app.save();
 
-      // WebSocket notification
-      this.employeeGateway.broadcastAppAssigned({
-        applicationId: app._id.toString(),
-        employeeId,
-        employeeName,
-      });
+      // WebSocket notification for each employee
+      for (const employee of employees) {
+        this.employeeGateway.broadcastAppAssigned({
+          applicationId: app._id.toString(),
+          employeeId: employee.id,
+          employeeName: employee.name,
+        });
+      }
 
       // Telegram notification
       await this.telegram.sendTestNotification(
-        `Application ${app.index} assigned to ${employeeName}`,
+        `Application ${app.index} assigned to ${employeeNames}`,
       );
 
       return app;

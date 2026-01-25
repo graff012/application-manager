@@ -42,19 +42,26 @@ export class ApplicationsEmployeeController {
 
   @Patch(':id/assign')
   @Roles('employee', 'admin')
-  async assignToEmployee(
+  async assignToEmployees(
     @Param('id') id: string,
     @Body() dto: AssignApplicationDto,
     @Request() req,
   ) {
-    const targetEmployeeId = dto.employeeId || req.user.userId;
-    const employee = await this.employeesService.findOne(targetEmployeeId);
+    const employeeIds =
+      dto.employeeIds && dto.employeeIds.length > 0
+        ? dto.employeeIds
+        : [req.user.userId];
 
-    await this.employeesService.addAssignedApplication(targetEmployeeId, id);
-    return this.applicationsService.assignToEmployee(
+    const employees: Array<{ id: string; name: string }> = [];
+    for (const employeeId of employeeIds) {
+      const employee = await this.employeesService.findOne(employeeId);
+      employees.push({ id: employeeId, name: employee.fullName });
+      await this.employeesService.addAssignedApplication(employeeId, id);
+    }
+
+    return this.applicationsService.assignToEmployees(
       id,
-      targetEmployeeId,
-      employee.fullName,
+      employees,
       new Date(dto.deadline),
     );
   }

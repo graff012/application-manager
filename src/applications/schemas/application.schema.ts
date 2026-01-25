@@ -52,8 +52,8 @@ export class Application {
   @Prop({ type: Types.ObjectId, ref: 'Inventory' })
   inventory?: Types.ObjectId;
 
-  @Prop({ type: Types.ObjectId, ref: 'Employee' })
-  assignedTo: Types.ObjectId;
+  @Prop({ type: [{ type: Types.ObjectId, ref: 'Employee' }], default: [] })
+  assignedTo: Types.ObjectId[];
 
   @Prop({ type: Date })
   deadline?: Date;
