@@ -169,7 +169,7 @@ export class InventoryService {
       throw new BadRequestException('Deduction requires an actor');
     }
 
-    return this.invModel
+    const updated = await this.invModel
       .findByIdAndUpdate(
         id,
         {
@@ -179,6 +179,12 @@ export class InventoryService {
         { new: true },
       )
       .exec();
+
+    if (existing.assignedToModel === 'User' && existing.assignedTo) {
+      await this.logUserHistory(existing.assignedTo, updated!._id, 'inactive');
+    }
+
+    return updated;
   }
 
   async findOne(id: string) {
