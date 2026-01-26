@@ -1,4 +1,3 @@
-// src/inventory/inventory.service.ts
 import {
   BadRequestException,
   Injectable,
@@ -12,6 +11,7 @@ import { UpdateInventoryDto, UsedToolDto } from './dto/update-inventory.dto';
 import { User, UserDocument } from '../users/schemas/user.schema';
 import { QrCodeService } from '../common/services/qr-code.service';
 import { Tool, ToolDocument } from '../tools/schemas/tool.schema';
+import { DeductInventoryDto } from './dto/deduct-inventory.dto';
 
 @Injectable()
 export class InventoryService {
@@ -142,6 +142,43 @@ export class InventoryService {
 
     if (!doc) throw new NotFoundException('Inventory not found');
     return doc.history.filter((entry) => entry.action === 'repair');
+  }
+
+  async deduct(id: string, dto: DeductInventoryDto, employeeId?: string) {
+    const existing = await this.invModel.findById(id).exec();
+    if (!existing) throw new NotFoundException('Inventory not found');
+
+    if (existing.status === 'inactive') {
+      throw new BadRequestException('Inventory is already inactive');
+    }
+
+    const historyEntry: any = {
+      action: 'inactive',
+      at: new Date(),
+      comment: dto.comment,
+      reason: dto.reason,
+    };
+
+    if (employeeId) {
+      historyEntry.by = new Types.ObjectId(employeeId);
+      historyEntry.byModel = 'Employee';
+    } else if (existing.assignedTo && existing.assignedToModel) {
+      historyEntry.by = existing.assignedTo;
+      historyEntry.byModel = existing.assignedToModel;
+    } else {
+      throw new BadRequestException('Deduction requires an actor');
+    }
+
+    return this.invModel
+      .findByIdAndUpdate(
+        id,
+        {
+          status: 'inactive',
+          $push: { history: historyEntry },
+        },
+        { new: true },
+      )
+      .exec();
   }
 
   async findOne(id: string) {
@@ -276,5 +313,11 @@ export class InventoryService {
       await this.logUserHistory(dto.user, updated!._id, 'updated');
     }
     return updated;
+  }
+
+  async remove(id: string) {
+    const result = await this.invModel.findByIdAndDelete(id).exec();
+    if (!result) throw new NotFoundException('Inventory not found');
+    return { deleted: true };
   }
 }

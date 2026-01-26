@@ -72,13 +72,21 @@ export class Inventory {
       {
         action: {
           type: String,
-          enum: ['assigned', 'repair', 'returned', 'broken'],
+          enum: [
+            'assigned',
+            'repair',
+            'returned',
+            'broken',
+            'active',
+            'inactive',
+          ],
           required: true,
         },
         by: { type: Types.ObjectId, refPath: 'history.byModel' },
         byModel: { type: String, enum: ['User', 'Employee'], required: true },
         at: { type: Date, default: () => new Date() },
         comment: { type: String },
+        reason: {type: String}
 
         // new: list of tools used in repair
         usedTools: [
@@ -98,6 +106,7 @@ export class Inventory {
     byModel: string;
     at: Date;
     comment?: string;
+    reason?: string
     usedTools?: {
       tool: Types.ObjectId;
       quantity: number;

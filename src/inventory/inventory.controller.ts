@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Patch,
@@ -24,6 +25,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 import { PermissionGuard } from 'src/auth/guards/permission.guard';
 import { RequirePermission } from 'src/auth/decorators/permissions.decorator';
+import { DeductInventoryDto } from './dto/deduct-inventory.dto';
 
 @ApiTags('inventory')
 @ApiBearerAuth()
@@ -102,6 +104,26 @@ export class InventoryController {
       urls.length ? urls : undefined,
       employeeId,
     );
+  }
+
+  @Delete(':id')
+  @RequirePermission('invetories', 'delete')
+  remove(@Param('id') id: string) {
+    return this.inventoryService.remove(id);
+  }
+
+  @Patch(":id/deduction")
+  @RequirePermission('inventories', 'update')
+  async deduct(
+    @Param('id') id: string,
+    @Body() dto: DeductInventoryDto
+    @Request() req,
+  ) {
+    const employeeId = 
+      req.user?.role === 'employee' || req.user?.role === 'admin'
+        ? req.user.userId
+        : undefined;
+    return this.inventoryService.deduct(id, dto, employeeId);
   }
 
   @Get('qr/:inventoryNumber')

@@ -12,7 +12,9 @@ import { Logger } from '@nestjs/common';
     origin: '*',
   },
 })
-export class EmployeeGateway implements OnGatewayConnection, OnGatewayDisconnect {
+export class EmployeeGateway
+  implements OnGatewayConnection, OnGatewayDisconnect
+{
   @WebSocketServer()
   server: Server;
 
@@ -23,7 +25,9 @@ export class EmployeeGateway implements OnGatewayConnection, OnGatewayDisconnect
 
     if (typeof employeeId === 'string' && employeeId) {
       client.join(employeeId);
-      this.logger.log(`Client connected: ${client.id} joined room for employee ${employeeId}`);
+      this.logger.log(
+        `Client connected: ${client.id} joined room for employee ${employeeId}`,
+      );
     } else {
       this.logger.warn(`Client connected without employeeId: ${client.id}`);
     }
@@ -33,7 +37,11 @@ export class EmployeeGateway implements OnGatewayConnection, OnGatewayDisconnect
     this.logger.log(`Client disconnected: ${client.id}`);
   }
 
-  broadcastAppAssigned(data: { applicationId: string; employeeId: string; employeeName: string }) {
+  broadcastAppAssigned(data: {
+    applicationId: string;
+    employeeId: string;
+    employeeName: string;
+  }) {
     this.server.to(data.employeeId).emit('appAssigned', data);
   }
 
