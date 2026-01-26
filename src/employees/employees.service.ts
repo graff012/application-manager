@@ -75,6 +75,7 @@ export class EmployeesService {
 
       return await this.employeeModel
         .find(query)
+        .sort({ createdAt: -1 })
         .populate('branch')
         .populate('department')
         .populate('assignedApplications')
@@ -96,6 +97,7 @@ export class EmployeesService {
     try {
       return await this.employeeModel
         .find({ branch: branchId })
+        .sort({ createdAt: -1 })
         .populate('branch')
         .populate('department')
         .populate('assignedApplications')

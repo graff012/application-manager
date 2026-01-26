@@ -226,7 +226,22 @@ export class ApplicationsService {
           `Application ${updated.index} status updated to ${status}.`,
         );
       }
-      return updated;
+
+      // Re-fetch with populated references
+      const populated = await this.appModel
+        .findById(updated._id)
+        .populate('user')
+        .populate('branch')
+        .populate('department')
+        .populate('assignedTo')
+        .populate('inventory')
+        .populate({
+          path: 'history.changedBy',
+          select: 'fullName',
+        })
+        .exec();
+
+      return populated ?? updated;
     } catch (error) {
       this.handleError(error, 'Failed to update application status.');
     }
@@ -271,7 +286,21 @@ export class ApplicationsService {
         `Application ${app.index} assigned to ${employeeNames}`,
       );
 
-      return app;
+      // Re-fetch with populated references
+      const populated = await this.appModel
+        .findById(app._id)
+        .populate('user')
+        .populate('branch')
+        .populate('department')
+        .populate('assignedTo')
+        .populate('inventory')
+        .populate({
+          path: 'history.changedBy',
+          select: 'fullName',
+        })
+        .exec();
+
+      return populated ?? app;
     } catch (error) {
       this.handleError(error, 'Failed to assign application.');
     }
@@ -345,7 +374,21 @@ export class ApplicationsService {
         `Application ${app.index} status changed to ${newStatus} by ${actor.name}`,
       );
 
-      return app;
+      // Re-fetch with populated references
+      const populated = await this.appModel
+        .findById(app._id)
+        .populate('user')
+        .populate('branch')
+        .populate('department')
+        .populate('assignedTo')
+        .populate('inventory')
+        .populate({
+          path: 'history.changedBy',
+          select: 'fullName',
+        })
+        .exec();
+
+      return populated ?? app;
     } catch (error) {
       this.handleError(error, 'Failed to update application status.');
     }
@@ -387,7 +430,21 @@ export class ApplicationsService {
         `Application ${app.index} deadline extended by ${employeeName}. Reason: ${reason}`,
       );
 
-      return app;
+      // Re-fetch with populated references
+      const populated = await this.appModel
+        .findById(app._id)
+        .populate('user')
+        .populate('branch')
+        .populate('department')
+        .populate('assignedTo')
+        .populate('inventory')
+        .populate({
+          path: 'history.changedBy',
+          select: 'fullName',
+        })
+        .exec();
+
+      return populated ?? app;
     } catch (error) {
       this.handleError(error, 'Failed to extend deadline.');
     }
@@ -472,7 +529,21 @@ export class ApplicationsService {
         `Application ${app.index} completed by ${employeeName}`,
       );
 
-      return app;
+      // Re-fetch with populated references
+      const populated = await this.appModel
+        .findById(app._id)
+        .populate('user')
+        .populate('branch')
+        .populate('department')
+        .populate('assignedTo')
+        .populate('inventory')
+        .populate({
+          path: 'history.changedBy',
+          select: 'fullName',
+        })
+        .exec();
+
+      return populated ?? app;
     } catch (error) {
       this.handleError(error, 'Failed to complete application.');
     }

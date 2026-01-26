@@ -30,7 +30,7 @@ export class BranchesService {
       query.name = { $regex: filter.search, $options: 'i' };
     }
 
-    return this.branchModel.find(query).exec();
+    return this.branchModel.find(query).sort({ createdAt: -1 }).exec();
   }
 
   findOne(id: string) {

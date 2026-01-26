@@ -32,7 +32,7 @@ export class DepartmentsService {
         query.name = { $regex: filter.search, $options: 'i' };
       }
 
-      return await this.deptModel.find(query).populate('branch').exec();
+      return await this.deptModel.find(query).sort({ createdAt: -1 }).populate('branch').exec();
     } catch (error) {
       throw new InternalServerErrorException('Failed to fetch departments');
     }
@@ -46,7 +46,7 @@ export class DepartmentsService {
       throw new BadRequestException('Invalid branch id format');
     }
     try {
-      return await this.deptModel.find({ branch: branchId }).populate('branch').exec();
+      return await this.deptModel.find({ branch: branchId }).sort({ createdAt: -1 }).populate('branch').exec();
     } catch (error) {
       throw new InternalServerErrorException('Failed to fetch departments by branch');
     }

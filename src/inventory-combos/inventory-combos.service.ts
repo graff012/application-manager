@@ -47,7 +47,7 @@ export class InventoryCombosService {
         query.name = { $regex: filter.search, $options: 'i' };
       }
 
-      return await this.comboModel.find(query).populate('devices').exec();
+      return await this.comboModel.find(query).sort({ createdAt: -1 }).populate('devices').exec();
     } catch (error) {
       throw new InternalServerErrorException(
         'Failed to fetch inventory combos',

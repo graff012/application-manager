@@ -64,6 +64,7 @@ export class UsersService {
 
       const users = await this.userModel
         .find(query)
+        .sort({ createdAt: -1 })
         .populate('branch')
         .populate('department')
         .exec();
@@ -83,6 +84,7 @@ export class UsersService {
     try {
       const users = await this.userModel
         .find({ branch: branchId })
+        .sort({ createdAt: -1 })
         .populate('branch')
         .populate('department')
         .exec();

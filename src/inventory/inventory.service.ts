@@ -116,6 +116,7 @@ export class InventoryService {
     return (
       this.invModel
         .find(query)
+        .sort({ createdAt: -1 })
         .populate('assignedTo')
         .populate('branch')
         .populate('department')

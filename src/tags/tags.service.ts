@@ -49,7 +49,7 @@ export class TagsService implements OnModuleInit {
       query.name = { $regex: filter.search, $options: 'i' };
     }
 
-    return this.tagModel.find(query).exec();
+    return this.tagModel.find(query).sort({ createdAt: -1 }).exec();
   }
 
   async findOne(id: string) {
@@ -73,7 +73,7 @@ export class TagsService implements OnModuleInit {
   }
 
   async findAllWithToolCount() {
-    const tags = await this.tagModel.find().exec();
+    const tags = await this.tagModel.find().sort({ createdAt: -1 }).exec();
 
     const toolCounts = await this.connection
       .collection('tools')

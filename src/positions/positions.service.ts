@@ -28,7 +28,7 @@ export class PositionsService {
   }
 
   findAll() {
-    return this.positionModel.find().exec();
+    return this.positionModel.find().sort({ createdAt: -1 }).exec();
   }
 
   async findOne(id: string) {

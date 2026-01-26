@@ -17,7 +17,7 @@ export class AdminsService {
 
   async findAll() {
     try {
-      return await this.adminModel.find().exec();
+      return await this.adminModel.find().sort({ createdAt: -1 }).exec();
     } catch (error) {
       throw new InternalServerErrorException('Failed to fetch admins');
     }

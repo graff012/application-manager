@@ -58,7 +58,7 @@ export class ToolsService {
       ];
     }
 
-    return this.toolModel.find(query).populate('tags').exec();
+    return this.toolModel.find(query).sort({ createdAt: -1 }).populate('tags').exec();
   }
 
   async findOne(id: string) {
@@ -118,6 +118,6 @@ export class ToolsService {
   }
 
   async findByTag(tagId: string) {
-    return this.toolModel.find({ tags: tagId }).populate('tags').exec();
+    return this.toolModel.find({ tags: tagId }).sort({ createdAt: -1 }).populate('tags').exec();
   }
 }
