@@ -12,9 +12,7 @@ import { Logger } from '@nestjs/common';
     origin: '*',
   },
 })
-export class EmployeeGateway
-  implements OnGatewayConnection, OnGatewayDisconnect
-{
+export class EmployeeGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   server: Server;
 
@@ -22,14 +20,18 @@ export class EmployeeGateway
 
   handleConnection(client: Socket) {
     const employeeId = client.handshake.query.employeeId;
+    const userId = client.handshake.query.userId;
 
     if (typeof employeeId === 'string' && employeeId) {
       client.join(employeeId);
-      this.logger.log(
-        `Client connected: ${client.id} joined room for employee ${employeeId}`,
-      );
+      this.logger.log(`Client connected: ${client.id} joined room for employee ${employeeId}`);
     } else {
       this.logger.warn(`Client connected without employeeId: ${client.id}`);
+    }
+
+    if (typeof userId === 'string' && userId) {
+      client.join(userId);
+      this.logger.log(`Client connected: ${client.id} joined room for user ${userId}`);
     }
   }
 
@@ -37,11 +39,7 @@ export class EmployeeGateway
     this.logger.log(`Client disconnected: ${client.id}`);
   }
 
-  broadcastAppAssigned(data: {
-    applicationId: string;
-    employeeId: string;
-    employeeName: string;
-  }) {
+  broadcastAppAssigned(data: { applicationId: string; employeeId: string; employeeName: string }) {
     this.server.to(data.employeeId).emit('appAssigned', data);
   }
 
@@ -53,6 +51,16 @@ export class EmployeeGateway
     employeeId: string;
   }) {
     this.server.to(data.employeeId).emit('statusChanged', data);
+  }
+
+  broadcastUserStatusChanged(data: {
+    applicationId: string;
+    newStatus: string;
+    changedBy: string;
+    timestamp: Date;
+    userId: string;
+  }) {
+    this.server.to(data.userId).emit('statusChanged', data);
   }
 
   broadcastNewApplication(data: {

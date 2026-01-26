@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsOptional, IsString } from 'class-validator';
 
 export class DeductInventoryDto {
@@ -8,6 +8,9 @@ export class DeductInventoryDto {
   @IsString()
   comment: string;
 
+  @ApiPropertyOptional({
+    example: 'Device status inactive or deduction from active',
+  })
   @IsOptional()
   @IsString()
   reason?: string;

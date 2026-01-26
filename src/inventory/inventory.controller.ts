@@ -1,7 +1,6 @@
 import {
   Body,
   Controller,
-  Delete,
   Get,
   Param,
   Patch,
@@ -18,6 +17,7 @@ import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { InventoryService } from './inventory.service';
 import { CreateInventoryDto } from './dto/create-inventory.dto';
+import { DeductInventoryDto } from './dto/deduct-inventory.dto';
 import { UpdateInventoryDto } from './dto/update-inventory.dto';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import type { Response } from 'express';
@@ -25,7 +25,6 @@ import * as path from 'path';
 import * as fs from 'fs';
 import { PermissionGuard } from 'src/auth/guards/permission.guard';
 import { RequirePermission } from 'src/auth/decorators/permissions.decorator';
-import { DeductInventoryDto } from './dto/deduct-inventory.dto';
 
 @ApiTags('inventory')
 @ApiBearerAuth()
@@ -106,20 +105,14 @@ export class InventoryController {
     );
   }
 
-  @Delete(':id')
-  @RequirePermission('invetories', 'delete')
-  remove(@Param('id') id: string) {
-    return this.inventoryService.remove(id);
-  }
-
-  @Patch(":id/deduction")
-  @RequirePermission('inventories', 'update')
+  @Patch(':id/deduction')
+  @RequirePermission('invetories', 'update')
   async deduct(
     @Param('id') id: string,
-    @Body() dto: DeductInventoryDto
-    @Request() req,
+    @Body() dto: DeductInventoryDto,
+    @Request() req
   ) {
-    const employeeId = 
+    const employeeId =
       req.user?.role === 'employee' || req.user?.role === 'admin'
         ? req.user.userId
         : undefined;

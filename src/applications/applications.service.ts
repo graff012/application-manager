@@ -95,7 +95,6 @@ export class ApplicationsService {
     try {
       const query = this.appModel
         .find(filter)
-        .sort({ createdAt: -1 })
         .populate('user')
         .populate('branch')
         .populate('department')
@@ -174,7 +173,6 @@ export class ApplicationsService {
     try {
       return await this.appModel
         .find({ user: userId })
-        .sort({ createdAt: -1 })
         .populate('assignedTo')
         .populate('inventory')
         .populate({
@@ -191,7 +189,6 @@ export class ApplicationsService {
     try {
       return await this.appModel
         .find({ assignedTo: employeeId })
-        .sort({ createdAt: -1 })
         .populate('user')
         .populate('branch')
         .populate('department')
@@ -226,22 +223,7 @@ export class ApplicationsService {
           `Application ${updated.index} status updated to ${status}.`,
         );
       }
-
-      // Re-fetch with populated references
-      const populated = await this.appModel
-        .findById(updated._id)
-        .populate('user')
-        .populate('branch')
-        .populate('department')
-        .populate('assignedTo')
-        .populate('inventory')
-        .populate({
-          path: 'history.changedBy',
-          select: 'fullName',
-        })
-        .exec();
-
-      return populated ?? updated;
+      return updated;
     } catch (error) {
       this.handleError(error, 'Failed to update application status.');
     }
@@ -286,21 +268,7 @@ export class ApplicationsService {
         `Application ${app.index} assigned to ${employeeNames}`,
       );
 
-      // Re-fetch with populated references
-      const populated = await this.appModel
-        .findById(app._id)
-        .populate('user')
-        .populate('branch')
-        .populate('department')
-        .populate('assignedTo')
-        .populate('inventory')
-        .populate({
-          path: 'history.changedBy',
-          select: 'fullName',
-        })
-        .exec();
-
-      return populated ?? app;
+      return app;
     } catch (error) {
       this.handleError(error, 'Failed to assign application.');
     }
@@ -361,12 +329,27 @@ export class ApplicationsService {
       await app.save();
 
       // WebSocket notification
-      this.employeeGateway.broadcastStatusChanged({
+      const statusRecipients =
+        app.assignedTo && app.assignedTo.length > 0
+          ? app.assignedTo.map((assignee) => assignee.toString())
+          : [actor.id];
+
+      for (const recipientId of statusRecipients) {
+        this.employeeGateway.broadcastStatusChanged({
+          applicationId: app._id.toString(),
+          newStatus,
+          changedBy: actor.name,
+          timestamp: new Date(),
+          employeeId: recipientId,
+        });
+      }
+
+      this.employeeGateway.broadcastUserStatusChanged({
         applicationId: app._id.toString(),
         newStatus,
         changedBy: actor.name,
         timestamp: new Date(),
-        employeeId: actor.id,
+        userId: app.user.toString(),
       });
 
       // Telegram notification
@@ -374,21 +357,7 @@ export class ApplicationsService {
         `Application ${app.index} status changed to ${newStatus} by ${actor.name}`,
       );
 
-      // Re-fetch with populated references
-      const populated = await this.appModel
-        .findById(app._id)
-        .populate('user')
-        .populate('branch')
-        .populate('department')
-        .populate('assignedTo')
-        .populate('inventory')
-        .populate({
-          path: 'history.changedBy',
-          select: 'fullName',
-        })
-        .exec();
-
-      return populated ?? app;
+      return app;
     } catch (error) {
       this.handleError(error, 'Failed to update application status.');
     }
@@ -430,21 +399,7 @@ export class ApplicationsService {
         `Application ${app.index} deadline extended by ${employeeName}. Reason: ${reason}`,
       );
 
-      // Re-fetch with populated references
-      const populated = await this.appModel
-        .findById(app._id)
-        .populate('user')
-        .populate('branch')
-        .populate('department')
-        .populate('assignedTo')
-        .populate('inventory')
-        .populate({
-          path: 'history.changedBy',
-          select: 'fullName',
-        })
-        .exec();
-
-      return populated ?? app;
+      return app;
     } catch (error) {
       this.handleError(error, 'Failed to extend deadline.');
     }
@@ -482,9 +437,8 @@ export class ApplicationsService {
             );
           }
 
-          // Decrease quantity and increase writtenOff count
+          // Increase writtenOff count
           await this.toolsService.update(usedTool.tool, {
-            quantity: (tool.quantity ?? 0) - usedTool.quantity,
             writtenOff: (tool.writtenOff ?? 0) + usedTool.quantity,
           });
         }
@@ -516,12 +470,27 @@ export class ApplicationsService {
       await app.save();
 
       // WebSocket notification
-      this.employeeGateway.broadcastStatusChanged({
+      const completionRecipients =
+        app.assignedTo && app.assignedTo.length > 0
+          ? app.assignedTo.map((assignee) => assignee.toString())
+          : [employeeId];
+
+      for (const recipientId of completionRecipients) {
+        this.employeeGateway.broadcastStatusChanged({
+          applicationId: app._id.toString(),
+          newStatus: 'completed',
+          changedBy: employeeName,
+          timestamp: new Date(),
+          employeeId: recipientId,
+        });
+      }
+
+      this.employeeGateway.broadcastUserStatusChanged({
         applicationId: app._id.toString(),
         newStatus: 'completed',
         changedBy: employeeName,
         timestamp: new Date(),
-        employeeId,
+        userId: app.user.toString(),
       });
 
       // Telegram notification
@@ -529,21 +498,7 @@ export class ApplicationsService {
         `Application ${app.index} completed by ${employeeName}`,
       );
 
-      // Re-fetch with populated references
-      const populated = await this.appModel
-        .findById(app._id)
-        .populate('user')
-        .populate('branch')
-        .populate('department')
-        .populate('assignedTo')
-        .populate('inventory')
-        .populate({
-          path: 'history.changedBy',
-          select: 'fullName',
-        })
-        .exec();
-
-      return populated ?? app;
+      return app;
     } catch (error) {
       this.handleError(error, 'Failed to complete application.');
     }

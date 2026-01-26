@@ -86,8 +86,7 @@ export class Inventory {
         byModel: { type: String, enum: ['User', 'Employee'], required: true },
         at: { type: Date, default: () => new Date() },
         comment: { type: String },
-        reason: {type: String}
-
+        reason: { type: String },
         // new: list of tools used in repair
         usedTools: [
           {
@@ -106,7 +105,7 @@ export class Inventory {
     byModel: string;
     at: Date;
     comment?: string;
-    reason?: string
+    reason?: string;
     usedTools?: {
       tool: Types.ObjectId;
       quantity: number;
