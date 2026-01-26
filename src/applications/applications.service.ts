@@ -95,6 +95,7 @@ export class ApplicationsService {
     try {
       const query = this.appModel
         .find(filter)
+        .sort({ createdAt: -1 })
         .populate('user')
         .populate('branch')
         .populate('department')
@@ -173,6 +174,7 @@ export class ApplicationsService {
     try {
       return await this.appModel
         .find({ user: userId })
+        .sort({ createdAt: -1 })
         .populate('assignedTo')
         .populate('inventory')
         .populate({
@@ -189,6 +191,7 @@ export class ApplicationsService {
     try {
       return await this.appModel
         .find({ assignedTo: employeeId })
+        .sort({ createdAt: -1 })
         .populate('user')
         .populate('branch')
         .populate('department')
