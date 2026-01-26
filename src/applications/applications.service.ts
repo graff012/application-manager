@@ -422,8 +422,9 @@ export class ApplicationsService {
             );
           }
 
-          // Increase writtenOff count
+          // Decrease quantity and increase writtenOff count
           await this.toolsService.update(usedTool.tool, {
+            quantity: (tool.quantity ?? 0) - usedTool.quantity,
             writtenOff: (tool.writtenOff ?? 0) + usedTool.quantity,
           });
         }
