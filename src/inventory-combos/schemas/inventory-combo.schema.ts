@@ -11,6 +11,9 @@ export class InventoryCombo {
   @Prop({ type: [{ type: Types.ObjectId, ref: 'Inventory' }], default: [] })
   devices: Types.ObjectId[];
 
+  @Prop({ type: Types.ObjectId, ref: 'User' })
+  user?: Types.ObjectId;
+
   @Prop()
   image?: string;
 

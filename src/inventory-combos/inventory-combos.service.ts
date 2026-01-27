@@ -20,9 +20,13 @@ export class InventoryCombosService {
     private readonly comboModel: Model<InventoryComboDocument>,
   ) {}
 
-  async create(dto: CreateInventoryComboDto, imageUrl?: string) {
+  async create(dto: CreateInventoryComboDto, imageUrl?: string, userId?: string) {
     try {
       const data: any = { ...dto };
+      if (!userId) {
+        throw new BadRequestException('User not authenticated');
+      }
+      data.user = userId;
       if (imageUrl) {
         data.image = imageUrl;
       }
@@ -47,7 +51,12 @@ export class InventoryCombosService {
         query.name = { $regex: filter.search, $options: 'i' };
       }
 
-      return await this.comboModel.find(query).sort({ createdAt: -1 }).populate('devices').exec();
+      return await this.comboModel
+        .find(query)
+        .sort({ createdAt: -1 })
+        .populate('devices')
+        .populate('user')
+        .exec();
     } catch (error) {
       throw new InternalServerErrorException(
         'Failed to fetch inventory combos',
@@ -66,6 +75,7 @@ export class InventoryCombosService {
       const combo = await this.comboModel
         .findById(id)
         .populate('devices')
+        .populate('user')
         .exec();
       if (!combo) throw new NotFoundException('Inventory combo not found');
       return combo;
@@ -90,6 +100,7 @@ export class InventoryCombosService {
       const combo = await this.comboModel
         .findByIdAndUpdate(id, data, { new: true })
         .populate('devices')
+        .populate('user')
         .exec();
       if (!combo) throw new NotFoundException('Inventory combo not found');
       return combo;

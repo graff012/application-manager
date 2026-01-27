@@ -7,6 +7,7 @@ import {
   Patch,
   Post,
   Query,
+  Request,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -35,9 +36,10 @@ export class InventoryCombosController {
   create(
     @Body() dto: CreateInventoryComboDto,
     @UploadedFile() file?: Multer.File,
+    @Request() req?,
   ) {
     const imageUrl = file?.path ? this.toUploadsUrlPath(file.path) : undefined;
-    return this.combosService.create(dto, imageUrl);
+    return this.combosService.create(dto, imageUrl, req?.user?.userId);
   }
 
   @Get()

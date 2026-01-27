@@ -18,6 +18,7 @@ export class CreateInventoryComboDto {
     type: [String],
     required: false,
   })
+
   @IsOptional()
   @IsArray()
   @IsMongoId({ each: true })
