@@ -92,7 +92,10 @@ export class ToolsService {
 
   // the number of tool, but count by tag
   async countByTag(tagId: string) {
-    const tools = await this.toolModel.find({ tags: tagId }).exec();
+    const tools = await this.toolModel
+      .find({ tags: tagId })
+      .sort({ createdAt: -1 })
+      .exec();
 
     return tools.map((t) => ({
       toolId: t._id,
