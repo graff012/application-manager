@@ -425,7 +425,7 @@ export class ApplicationsService {
 
       const employeeObjectId = new Types.ObjectId(employeeId);
 
-      // Deduct used tools from inventory
+      // Deduct used tools from inventory by decreasing quantity
       if (dto.usedTools && dto.usedTools.length > 0) {
         for (const usedTool of dto.usedTools) {
           const tool = await this.toolsService.findOne(usedTool.tool);
@@ -437,9 +437,9 @@ export class ApplicationsService {
             );
           }
 
-          // Increase writtenOff count
+          // Decrease total quantity (keep writtenOff unchanged)
           await this.toolsService.update(usedTool.tool, {
-            writtenOff: (tool.writtenOff ?? 0) + usedTool.quantity,
+            quantity: (tool.quantity ?? 0) - usedTool.quantity,
           });
         }
       }
