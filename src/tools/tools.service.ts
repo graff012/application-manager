@@ -4,10 +4,11 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { Tool, ToolDocument } from './schemas/tool.schema';
 import { CreateToolDto } from './dto/create-tool.dto';
 import { UpdateToolDto } from './dto/update-tool.dto';
+import { DeductToolDto } from './dto/deduct-tool.dto';
 
 @Injectable()
 export class ToolsService {
@@ -109,6 +110,46 @@ export class ToolsService {
       .exec();
     if (!tool) throw new NotFoundException('Tool not found');
     return tool;
+  }
+
+  async deduct(
+    id: string,
+    dto: DeductToolDto,
+    actor?: { id: string; model: 'Employee' | 'Admin' },
+  ) {
+    if (!actor?.id || !actor?.model) {
+      throw new BadRequestException('Deduction requires an actor');
+    }
+
+    const existing = await this.toolModel.findById(id).exec();
+    if (!existing) throw new NotFoundException('Tool not found');
+
+    if (existing.status === 'inactive') {
+      throw new BadRequestException('Tool is already inactive');
+    }
+
+    const historyEntry = {
+      action: 'deducted',
+      by: new Types.ObjectId(actor.id),
+      byModel: actor.model,
+      at: new Date(),
+      comment: dto.comment,
+      reason: dto.reason,
+    };
+
+    const updated = await this.toolModel
+      .findByIdAndUpdate(
+        id,
+        {
+          status: 'inactive',
+          $push: { history: historyEntry },
+        },
+        { new: true },
+      )
+      .populate('tags')
+      .exec();
+
+    return updated;
   }
 
   async remove(id: string) {

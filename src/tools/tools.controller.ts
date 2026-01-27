@@ -7,7 +7,7 @@ import {
   Patch,
   Post,
   Query,
-  Req,
+  Request,
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
@@ -15,6 +15,7 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { ToolsService } from './tools.service';
 import { CreateToolDto } from './dto/create-tool.dto';
 import { UpdateToolDto } from './dto/update-tool.dto';
+import { DeductToolDto } from './dto/deduct-tool.dto';
 import { PermissionGuard } from 'src/auth/guards/permission.guard';
 import { RequirePermission } from 'src/auth/decorators/permissions.decorator';
 
@@ -69,6 +70,26 @@ export class ToolsController {
   @RequirePermission('tools', 'update')
   update(@Param('id') id: string, @Body() dto: UpdateToolDto) {
     return this.toolsService.update(id, dto);
+  }
+
+  @Patch(':id/deduction')
+  @RequirePermission('tools', 'update')
+  deduct(
+    @Param('id') id: string,
+    @Body() dto: DeductToolDto,
+    @Request() req,
+  ) {
+    const actorId =
+      req.user?.role === 'employee' || req.user?.role === 'admin'
+        ? req.user.userId
+        : undefined;
+    const actorModel = req.user?.role === 'admin' ? 'Admin' : 'Employee';
+
+    return this.toolsService.deduct(
+      id,
+      dto,
+      actorId ? { id: actorId, model: actorModel } : undefined,
+    );
   }
 
   @Delete(':id')
