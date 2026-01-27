@@ -269,6 +269,16 @@ export class ApplicationsService {
         });
       }
 
+      // WebSocket notification for the user
+      this.employeeGateway.broadcastUserStatusChanged({
+        applicationId: app._id.toString(),
+        index: app.index,
+        newStatus: 'accepted',
+        changedBy: employeeNames,
+        timestamp: new Date(),
+        userId: app.user.toString(),
+      });
+
       // Telegram notification
       await this.telegram.sendTestNotification(
         `Application ${app.index} assigned to ${employeeNames}`,
