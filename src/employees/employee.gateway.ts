@@ -45,6 +45,7 @@ export class EmployeeGateway implements OnGatewayConnection, OnGatewayDisconnect
 
   broadcastStatusChanged(data: {
     applicationId: string;
+    index: string;
     newStatus: string;
     changedBy: string;
     timestamp: Date;
@@ -55,6 +56,7 @@ export class EmployeeGateway implements OnGatewayConnection, OnGatewayDisconnect
 
   broadcastUserStatusChanged(data: {
     applicationId: string;
+    index: string;
     newStatus: string;
     changedBy: string;
     timestamp: Date;

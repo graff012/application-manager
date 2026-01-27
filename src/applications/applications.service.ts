@@ -343,6 +343,7 @@ export class ApplicationsService {
       for (const recipientId of statusRecipients) {
         this.employeeGateway.broadcastStatusChanged({
           applicationId: app._id.toString(),
+          index: app.index,
           newStatus,
           changedBy: actor.name,
           timestamp: new Date(),
@@ -352,6 +353,7 @@ export class ApplicationsService {
 
       this.employeeGateway.broadcastUserStatusChanged({
         applicationId: app._id.toString(),
+        index: app.index,
         newStatus,
         changedBy: actor.name,
         timestamp: new Date(),
@@ -484,6 +486,7 @@ export class ApplicationsService {
       for (const recipientId of completionRecipients) {
         this.employeeGateway.broadcastStatusChanged({
           applicationId: app._id.toString(),
+          index: app.index,
           newStatus: 'completed',
           changedBy: employeeName,
           timestamp: new Date(),
@@ -493,6 +496,7 @@ export class ApplicationsService {
 
       this.employeeGateway.broadcastUserStatusChanged({
         applicationId: app._id.toString(),
+        index: app.index,
         newStatus: 'completed',
         changedBy: employeeName,
         timestamp: new Date(),
