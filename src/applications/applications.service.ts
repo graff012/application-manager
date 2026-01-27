@@ -29,6 +29,29 @@ export class ApplicationsService {
     private readonly toolsService: ToolsService,
   ) {}
 
+  private async markOverdueApplications() {
+    const now = new Date();
+    await this.appModel
+      .updateMany(
+        {
+          deadline: { $lt: now },
+          status: { $in: ['accepted', 'inProgress'] },
+        },
+        {
+          $set: { status: 'overdue' },
+          $push: {
+            history: {
+              status: 'overdue',
+              changedByModel: 'Admin',
+              changedAt: now,
+              comment: 'Auto marked overdue after deadline passed',
+            },
+          },
+        },
+      )
+      .exec();
+  }
+
   private async generateIndex(): Promise<string> {
     try {
       const year = new Date().getFullYear();
@@ -91,8 +114,12 @@ export class ApplicationsService {
     }
   }
 
-  findAll(filter: any = {}, pagination?: { limit?: number; offset?: number }) {
+  async findAll(
+    filter: any = {},
+    pagination?: { limit?: number; offset?: number },
+  ) {
     try {
+      await this.markOverdueApplications();
       const query = this.appModel
         .find(filter)
         .sort({ createdAt: -1 })
@@ -122,6 +149,7 @@ export class ApplicationsService {
 
   async countByStatus(filter: any = {}) {
     try {
+      await this.markOverdueApplications();
       const results = await this.appModel
         .aggregate<{
           _id: ApplicationStatus;
@@ -136,6 +164,7 @@ export class ApplicationsService {
         new: 0,
         accepted: 0,
         inProgress: 0,
+        overdue: 0,
         completed: 0,
         rejected: 0,
       };
@@ -154,6 +183,7 @@ export class ApplicationsService {
 
   async findOne(id: string) {
     try {
+      await this.markOverdueApplications();
       const app = await this.appModel
         .findById(id)
         .populate('user')
@@ -175,6 +205,7 @@ export class ApplicationsService {
 
   async findByUser(userId: string) {
     try {
+      await this.markOverdueApplications();
       return await this.appModel
         .find({ user: userId })
         .sort({ createdAt: -1 })
@@ -192,6 +223,7 @@ export class ApplicationsService {
 
   async findByEmployee(employeeId: any) {
     try {
+      await this.markOverdueApplications();
       return await this.appModel
         .find({ assignedTo: employeeId })
         .sort({ createdAt: -1 })
@@ -392,9 +424,9 @@ export class ApplicationsService {
       const app = await this.appModel.findById(applicationId).exec();
       if (!app) throw new NotFoundException('Application not found');
 
-      if (app.status !== 'inProgress') {
+      if (app.status !== 'inProgress' && app.status !== 'overdue') {
         throw new BadRequestException(
-          'Deadline can only be extended when status is inProgress',
+          'Deadline can only be extended when status is inProgress or overdue',
         );
       }
 
@@ -402,6 +434,9 @@ export class ApplicationsService {
       const employeeObjectId = new Types.ObjectId(employeeId);
 
       app.deadline = newDeadline;
+      if (app.status === 'overdue') {
+        app.status = 'inProgress';
+      }
       app.history.push({
         status: app.status,
         changedBy: employeeObjectId,
@@ -435,9 +470,9 @@ export class ApplicationsService {
       const app = await this.appModel.findById(applicationId).exec();
       if (!app) throw new NotFoundException('Application not found');
 
-      if (app.status !== 'inProgress') {
+      if (app.status !== 'inProgress' && app.status !== 'overdue') {
         throw new BadRequestException(
-          'Application can only be completed when status is inProgress',
+          'Application can only be completed when status is inProgress or overdue',
         );
       }
 

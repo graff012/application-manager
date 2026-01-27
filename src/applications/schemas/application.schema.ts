@@ -7,6 +7,7 @@ export type ApplicationStatus =
   | 'new'
   | 'accepted'
   | 'inProgress'
+  | 'overdue'
   | 'completed'
   | 'rejected';
 
@@ -17,7 +18,7 @@ export class Application {
 
   @Prop({
     required: true,
-    enum: ['new', 'accepted', 'inProgress', 'completed', 'rejected'],
+    enum: ['new', 'accepted', 'inProgress', 'overdue', 'completed', 'rejected'],
     default: 'new',
   })
   status: ApplicationStatus;
