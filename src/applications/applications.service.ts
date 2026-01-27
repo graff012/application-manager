@@ -95,6 +95,7 @@ export class ApplicationsService {
     try {
       const query = this.appModel
         .find(filter)
+        .sort({ createdAt: -1 })
         .populate('user')
         .populate('branch')
         .populate('department')
@@ -122,7 +123,10 @@ export class ApplicationsService {
   async countByStatus(filter: any = {}) {
     try {
       const results = await this.appModel
-        .aggregate<{ _id: ApplicationStatus; count: number }>([
+        .aggregate<{
+          _id: ApplicationStatus;
+          count: number;
+        }>([
           { $match: filter },
           { $group: { _id: '$status', count: { $sum: 1 } } },
         ])
@@ -173,6 +177,7 @@ export class ApplicationsService {
     try {
       return await this.appModel
         .find({ user: userId })
+        .sort({ createdAt: -1 })
         .populate('assignedTo')
         .populate('inventory')
         .populate({
@@ -189,6 +194,7 @@ export class ApplicationsService {
     try {
       return await this.appModel
         .find({ assignedTo: employeeId })
+        .sort({ createdAt: -1 })
         .populate('user')
         .populate('branch')
         .populate('department')
