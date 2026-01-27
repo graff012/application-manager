@@ -44,6 +44,7 @@ export class ApplicationsController {
   @RequirePermission('applications', 'read')
   findAll(
     @Query('user') user?: string,
+    @Query('branch') branch?: string,
     @Query('status') status?: string,
     @Query('limit') limit?: string,
     @Query('offset') offset?: string,
@@ -51,6 +52,7 @@ export class ApplicationsController {
   ) {
     const filter: any = {};
     if (user) filter.user = user;
+    if (branch) filter.branch = branch;
     if (status) filter.status = status;
 
     // Employees only see their assigned applications, admins see all
