@@ -419,6 +419,7 @@ export class ApplicationsService {
     reason: string,
     employeeId: string,
     employeeName: string,
+    employeeModel: 'Employee' | 'Admin' = 'Employee',
   ) {
     try {
       const app = await this.appModel.findById(applicationId).exec();
@@ -440,7 +441,7 @@ export class ApplicationsService {
       app.history.push({
         status: app.status,
         changedBy: employeeObjectId,
-        changedByModel: 'Employee',
+        changedByModel: employeeModel,
         changedAt: new Date(),
         comment: `Deadline extended from ${oldDeadline?.toISOString() || 'none'} to ${newDeadline.toISOString()}. Reason: ${reason}`,
       });

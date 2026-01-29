@@ -101,14 +101,19 @@ export class ApplicationsEmployeeController {
     @Body() dto: ExtendDeadlineDto,
     @Request() req,
   ) {
-    const employeeId = req.user.userId;
-    const employee = await this.employeesService.findOne(employeeId);
+    const actorId = req.user.userId;
+    const actor =
+      req.user.role === 'admin'
+        ? await this.adminsService.findOne(actorId)
+        : await this.employeesService.findOne(actorId);
+    const actorModel = req.user.role === 'admin' ? 'Admin' : 'Employee';
     return this.applicationsService.extendDeadline(
       id,
       new Date(dto.newDeadline),
       dto.reason,
-      employeeId,
-      employee.fullName,
+      actorId,
+      actor.fullName,
+      actorModel,
     );
   }
 
